@@ -1,4 +1,4 @@
 kobuki_asmd
 ============
 kouhara 3
-malidong
+malidong read
