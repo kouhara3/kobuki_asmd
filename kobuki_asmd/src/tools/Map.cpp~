@@ -24,10 +24,7 @@ public:
 
 
 private:
-  Coordinate left_top;
-  Coordinate right_top;
-  Coordinate left_bottom;
-  Coordinate right_bottom;
+  Coordinate max;
 };
 
 /*****************************************************************************

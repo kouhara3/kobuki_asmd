@@ -1,14 +1,22 @@
 /**
  * @file /kobuki_driver/src/test/KobukiManager.cpp
  *
- * @manager of kobuki.
+ * @usually used utilities.
  **/
 /*****************************************************************************
 ** Includes
 *****************************************************************************/
 
+#include <ecl/geometry/pose2d.hpp>
 #include <iostream>
 #include <math.h>
+//#include "Coordinate.cpp"
+
+/*****************************************************************************
+** Definition
+*****************************************************************************/
+
+#define ENCODER_PER_CENTIMETER 117
 
 /*****************************************************************************
 ** Classes
@@ -18,25 +26,27 @@ public:
   //change encoder to centimeter
   static int changeEncoderToCentimeter(int encoder){
     int centim;
-    centim = (int) (encoder/(folat)ENCODER_PER_CENTIMETER);
-    cout<< "Change encoder [" << encoder << "] to centimeter [" << centim << "]" << endl;
+    centim = (int) (encoder/(float)ENCODER_PER_CENTIMETER);
+    std::cout<< "Change encoder [" << encoder << "] to centimeter [" << centim << "]" << std::endl;
     return centim;
   }
-  //convert distance and anle to coordinate
+
+  //convert distance and angle to coordinate
   static Coordinate convertDistToCoordinate(int dist, ecl::Angle<double> angle) {
-    int dist_X = cos(this->heading) * dist;
-    int dist_Y = sin(this->heading) * dist;
-    Coordinate coord(dist_X, dist_Y);
+    int dist_x = cos(angle) * dist;
+    int dist_y = sin(angle) * dist;
+    std::cout<< "Convert ["<< dist << ", "<< angle <<"] to" << " [" << dist_x << ", "<< dist_y <<"]" << std::endl;
+    Coordinate coord(dist_x, dist_y);
     return coord;
   }
-
-
 };
 
 /*****************************************************************************
 ** Test Main
 *****************************************************************************/
-
-int main() {
+/*
+int main() { 
+  Utilities::changeEncoderToCentimeter(11700);
   return 0;
 }
+*/
