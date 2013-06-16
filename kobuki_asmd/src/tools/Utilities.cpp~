@@ -22,15 +22,13 @@ public:
     cout<< "Change encoder [" << encoder << "] to centimeter [" << centim << "]" << endl;
     return centim;
   }
-  //convert distance and anle to coordinate
+  //convert distance and angle to coordinate
   static Coordinate convertDistToCoordinate(int dist, ecl::Angle<double> angle) {
     int dist_X = cos(this->heading) * dist;
     int dist_Y = sin(this->heading) * dist;
     Coordinate coord(dist_X, dist_Y);
     return coord;
   }
-
-
 };
 
 /*****************************************************************************

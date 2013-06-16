@@ -46,7 +46,7 @@ public:
   void processStreamData() {
     kobuki::CoreSensors::Data data = kobuki.getCoreSensorData();
     std::cout << "Encoders [" <<  data.left_encoder << "," << data.right_encoder << "]" << std::endl;
-    std::cout << "Angle [" << kobuki.getHeading().degrees () << "]" << std::endl;
+    std::cout << "Angle [" << kobuki.getHeading().degrees() << "]" << std::endl;
   }
 
 private:

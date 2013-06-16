@@ -17,7 +17,7 @@ public:
     this->X = 0;
     this->Y = 0;
   }
-  Coordinate(int coord_x, coord_y){
+  Coordinate(int coord_x, int coord_y){
     this->X = coord_x;
     this->Y = coord_y;
   }
@@ -54,7 +54,7 @@ public:
     Coordinate coord2;
     coord2.X = this->X + coord1.X;
     coord2.X = this->X + coord1.X;
-    return t2;
+    return coord2;
   } 
 
   Coordinate &operator+=(const Coordinate &coord){
@@ -67,7 +67,7 @@ public:
     Coordinate coord2;
     coord2.X = this->X - coord1.X;
     coord2.X = this->X - coord1.X;
-    return t2;
+    return coord2;
   } 
 
   Coordinate &operator-=(const Coordinate &coord){
@@ -88,7 +88,11 @@ private:
 /*****************************************************************************
 ** Test Main
 *****************************************************************************/
-
+/*
 int main() {
+    Coordinate c;
+    c.setCoordinate(2,5);
+    std::cout << "Coord [" << c.getCoordinateX() << ", " << c.getCoordinateY() << "]" << std::endl;
     return 0;
 }
+*/
