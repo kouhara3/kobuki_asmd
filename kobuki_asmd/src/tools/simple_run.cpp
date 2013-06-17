@@ -55,12 +55,13 @@ public:
   void changeDirction(double _dirct_speed, double angle) {
     dirct_speed = _dirct_speed;
     kobuki.setBaseControl(stri_speed, _dirct_speed); // dirct_speed: to control the speed of dirction
-      if (dth >= angle ＊ pi / 180) {
+	//    if (dth >= (angle ＊ ecl::pi / 180)) {
+    if (dth >= (angle * ecl::pi /180)) {
         stopRun();
-      } else if (dth <= -angle ＊ pi / 180) {
+	} else if (dth <= (-angle * ecl::pi / 180)) {
         stopRun();
-      } 
-      return;
+    } 
+    return;
   }
 
   void stopRun() {
@@ -118,8 +119,8 @@ int main(int argc, char** argv)
   try {
     while (!shutdown_req){
       sleep();
-      kobuki_manager.goStright(0.3, 2);
-      //kobuki_manager.changeDirction(0.3, 90);
+      kobuki_manager.goStright(-0.3, 1);
+      //kobuki_manager.changeDirction(-0.7, 90);
       pose = kobuki_manager.getPose();
       std::cout << "current pose: [" << pose.x() << ", " << pose.y() << ", " << pose.heading() << "]" << std::endl;
     }
