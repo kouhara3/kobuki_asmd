@@ -38,6 +38,7 @@ public:
     last_data = new_data;
   }
 
+  Data getData(){ return( data ); }   // get row signal
 
 private:
   kobuki::CoreSensors::Data last_data;
@@ -45,7 +46,7 @@ public:
   Data data;
 };
 
-}; // end of namespace kobuki
+} // end of namespace kobuki
 
 class STMEventManager{
 public:
@@ -75,18 +76,15 @@ public:
     IR_MISSED,
   };
 
-  unsigned char last_bumper_signal;
-  unsigned char last_ir_signal;
-
   STMEventManager(){
     last_bumper_signal = 0x00;
     last_ir_signal = 0x00;
   }
 
-  void checkEvent( kobuki::kobukiManager& kobuki_manager ){
+  void checkEvent( kobuki::SensorManager::Data new_sensor,
+    kobuki::IRManager::Data new_ir ){
     int i;
     unsigned char signal;
-    kobuki::SensorManager::Data& new_sensor = kobuki_manager.
 
     signal = 0x00;    // check signal
     if( new_sensor.left_bumper  ) signal = 0x01;
@@ -99,13 +97,13 @@ public:
     last_bumper_signal = signal;  // update signal
 
     signal = 0x00;    // check signal
-    for( i=0; i<3; i++ ){
-      if( new_ir.data[i].far_left  ) signal = 0x01;
-      if( new_ir.data[i].far_center) signal = 0x01;
-      if( new_ir.data[i].far_right ) signal = 0x01;
-      if( new_ir.data[i].near_left  ) signal = 0x01;
-      if( new_ir.data[i].near_center) signal = 0x01;
-      if( new_ir.data[i].near_right ) signal = 0x01;
+    for( i=0; i<new_ir.size(); i++ ){
+      if( new_ir[i].far_left  ) signal = 0x01;
+      if( new_ir[i].far_center) signal = 0x01;
+      if( new_ir[i].far_right ) signal = 0x01;
+      if( new_ir[i].near_left  ) signal = 0x01;
+      if( new_ir[i].near_center) signal = 0x01;
+      if( new_ir[i].near_right ) signal = 0x01;
     }
     if( signal ^ last_ir_signal ){
       if( signal ) sendEvent( IR_FOUND );
@@ -117,5 +115,10 @@ public:
   void sendEvent( int mes ){
     std::cout << "sendEvent [" << mes << "]" << std::endl;
    }
+
+private:
+  unsigned char last_bumper_signal;
+  unsigned char last_ir_signal;
+
 };
 

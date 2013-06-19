@@ -48,12 +48,14 @@ public:
 //    std::cout << "Encoders [" <<  data.left_encoder << "," << data.right_encoder << "]" << std::endl;
 //  }
   void processStreamData() {
-    kobuki::CoreSensor::Data core_data = kobuki.getCoreSensorData();
+    kobuki::CoreSensors::Data core_data = kobuki.getCoreSensorData();
     kobuki::DockIR::Data ir_data = kobuki.getDockIRData();
     core_sensor.update( core_data );
     ir_sensor.update( ir_data );
   }
 
+  kobuki::IRManager::Data getIRData(){ return( ir_sensor.getData() ); }
+  kobuki::SensorManager::Data getSensorData(){ return( core_sensor.getData() ); }
 
 private:
   kobuki::Kobuki kobuki;
@@ -68,10 +70,12 @@ private:
 
 int main() {
   KobukiManager kobuki_manager;
-  EventMaganer event_manager;
+  STMEventManager event_manager;
+  ecl::Sleep sleep(0.1);
   while( true ){
-     kobuki_manager.spin();
-     event_manager.checkEvent( kobuki_manager.core_sensor.data, kobuki_manager.ir_sensor);
+    //kobuki_manager.spin();
+    sleep();
+    event_manager.checkEvent( kobuki_manager.getSensorData() , kobuki_manager.getIRData() );
   }
   return 0;
 }
