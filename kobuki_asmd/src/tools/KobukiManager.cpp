@@ -128,6 +128,14 @@ public:
     std::cout << "[" << pose.x() << ", " << pose.y() << ", " << pose.heading() << "]" << std::endl;
     return this->pose;
   }
+
+/*
+ * Simple Run Methods (Now Printing)
+ */
+// void goStraight( double run_speed, double distance );
+// void changeDirection( double turn_speed, doule angle );
+// void stopRun(); 
+
 private:
   Coordinate coord_left;
   Coordinate coord_right;
