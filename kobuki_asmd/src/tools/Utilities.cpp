@@ -3,6 +3,7 @@
  *
  * @usually used utilities.
  **/
+#pragma ocne
 /*****************************************************************************
 ** Includes
 *****************************************************************************/
@@ -10,7 +11,7 @@
 #include <ecl/geometry/pose2d.hpp>
 #include <iostream>
 #include <math.h>
-//#include "Coordinate.cpp"
+#include "Coordinate.cpp"
 
 /*****************************************************************************
 ** Definition

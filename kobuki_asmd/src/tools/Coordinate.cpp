@@ -3,6 +3,7 @@
  *
  * @Coordinate.
  **/
+#pragma once
 /*****************************************************************************
 ** Includes
 *****************************************************************************/
@@ -17,12 +18,12 @@ public:
     this->X = 0;
     this->Y = 0;
   }
-  Coordinate(int coord_x, int coord_y){
+  Coordinate(float coord_x, float coord_y){
     this->X = coord_x;
     this->Y = coord_y;
   }
 
-  void setCoordinate(int coord_x, int coord_y){
+  void setCoordinate(float coord_x, float coord_y){
     this->X = coord_x;
     this->Y = coord_y;
   }
@@ -81,8 +82,8 @@ public:
   }  
 
 private:
-  int X;
-  int Y;
+  float X;
+  float Y;
 };
 
 /*****************************************************************************

@@ -3,6 +3,7 @@
  *
  * @manager of kobuki.
  **/
+#pragma once
 /*****************************************************************************
 ** Includes
 *****************************************************************************/
@@ -42,6 +43,7 @@ public:
     this->left_encoder_old = kobuki.getCoreSensorData().left_encoder;
     this->right_encoder_old = kobuki.getCoreSensorData().right_encoder;
     this->heading = kobuki.getHeading();
+    this->initialPose.setCoordinate(0,0);
     
   }
 
@@ -68,7 +70,7 @@ public:
     ecl::linear_algebra::Vector3d pose_update_rates;
     kobuki.updateOdometry(pose_update, pose_update_rates);
     this->pose *= pose_update;
-
+    
     //kobuki::CoreSensors::Data data = kobuki.getCoreSensorData();
     //std::cout << "Encoders [" <<  data.left_encoder << "," << data.right_encoder << "]" << std::endl;
     
@@ -133,11 +135,14 @@ private:
   Coordinate coord_right;
   int left_encoder_old;
   int right_encoder_old;
+
+  Coordinate old_coord;
+  Coordinate now_coord;
   ecl::Angle<double> heading;
-  kobuki::Kobuki kobuki;
   ecl::Slot<> slot_stream_data;
   ecl::Pose2D<double> pose;
-
+  Coordinate initialPose;
+  kobuki::Kobuki kobuki;
 
 };
 
@@ -149,6 +154,7 @@ int main() {
   try{
     KobukiManager kobuki_manager;
     kobuki_manager.spin();
+    std::cout << "[" << kobuki_manager.getPose().x() << ", " << kobuki_manager.getPose().y() << ", " << kobuki_manager.getPose().heading() << "]" << std::endl;
   } catch ( ecl::StandardException &e ) {
     std::cout << e.what();
   }
