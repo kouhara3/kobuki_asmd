@@ -4,8 +4,7 @@
 
 #include "main.h"
 #include "MEXU.h"
-#include "KobukiManager.hpp"
-
+#include "Map.cpp"
 
 /*====================================================
  * tmp class
@@ -70,12 +69,14 @@ private:
 public:
   /* attributes */
   int current_state;
-  KobukiManager kobukimanager;
+  Map map;
+  KobukiManager* kobukimanager;
 
   /* methods */                          
   KobukiStateMachine() : StateMachine(){
       eventManager.addSTM(this);
       current_state = 0;
+      kobukimanager = map.getKobukiManager();
   }
 
   ~KobukiStateMachine() {}
@@ -88,9 +89,13 @@ public:
 
 #define KobukiStateMachine_STATE_wait 0
 
-#define KobukiStateMachine_STATE_run 1
+#define KobukiStateMachine_STATE_run1 1
 
-#define KobukiStateMachine_STATE_turn 2
+#define KobukiStateMachine_STATE_turnRight 2
+
+#define KobukiStateMachine_STATE_run2 3
+
+#define KobukiStateMachine_STATE_turnLeft 4
 
 
 /* Event ID Definitions */

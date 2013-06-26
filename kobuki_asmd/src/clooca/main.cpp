@@ -71,14 +71,14 @@ int main (int argc, char *argv[])
   std::cout << "Demo : Example of simple control loop." << std::endl;
   //KobukiManager kobuki_manager;
 
-  ecl::Sleep sleep(1);
+  ecl::Sleep sleep(0.1);
   ecl::Pose2D<double> pose;
   try {
     while (!shutdown_req){
       event.checkEvent( stm );
       eventManager.execute();
-      //sleep();
-      //pose = stm.kobukimanager.getPose();
+      sleep();
+      pose = stm.kobukimanager->getPose();
       //std::cout << "current pose: [" << pose.x() << ", " << pose.y() << ", " << pose.heading() << "]" << std::endl;
     }
   } catch ( ecl::StandardException &e ) {

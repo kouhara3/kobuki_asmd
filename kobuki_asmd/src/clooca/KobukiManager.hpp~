@@ -238,7 +238,6 @@ private:
   int left_encoder_old;
   int right_encoder_old;
   ecl::Angle<double> heading;
-
   kobuki::Kobuki kobuki;
   ecl::Slot<> slot_stream_data;
   ecl::Pose2D<double> pose;

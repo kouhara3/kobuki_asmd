@@ -26,7 +26,25 @@ int tmp::execute(MEXUEvent *event) {
     event->event_id, current_state, next_state);
     
   current_state = next_state;
-
+    
+  switch(current_state) {
+    
+  case tmp_STATE_stone: /* stone */
+  //  win scissors
+//lose paper
+    break;
+    
+  case tmp_STATE_scissors: /* scissors */
+  //  win paper
+//lose stone
+    break;
+    
+  case tmp_STATE_paper: /* paper */
+  //  win stone
+//lose scissors
+    break;
+    
+  }
   return 0;
 }
 
@@ -36,7 +54,7 @@ int tmp::execute(MEXUEvent *event) {
  *
  */
 const int KobukiStateMachine::matrix[] = {
-KobukiStateMachine_STATE_IGNORE,KobukiStateMachine_STATE_IGNORE,KobukiStateMachine_STATE_IGNORE,KobukiStateMachine_STATE_IGNORE,KobukiStateMachine_STATE_run,KobukiStateMachine_STATE_IGNORE,KobukiStateMachine_STATE_IGNORE,KobukiStateMachine_STATE_IGNORE,KobukiStateMachine_STATE_IGNORE,KobukiStateMachine_STATE_IGNORE,KobukiStateMachine_STATE_IGNORE,KobukiStateMachine_STATE_IGNORE,KobukiStateMachine_STATE_turn,KobukiStateMachine_STATE_IGNORE,KobukiStateMachine_STATE_IGNORE,KobukiStateMachine_STATE_IGNORE,KobukiStateMachine_STATE_IGNORE,KobukiStateMachine_STATE_IGNORE,KobukiStateMachine_STATE_IGNORE,KobukiStateMachine_STATE_IGNORE,KobukiStateMachine_STATE_run
+KobukiStateMachine_STATE_IGNORE,KobukiStateMachine_STATE_IGNORE,KobukiStateMachine_STATE_IGNORE,KobukiStateMachine_STATE_IGNORE,KobukiStateMachine_STATE_run1,KobukiStateMachine_STATE_IGNORE,KobukiStateMachine_STATE_IGNORE,KobukiStateMachine_STATE_IGNORE,KobukiStateMachine_STATE_IGNORE,KobukiStateMachine_STATE_IGNORE,KobukiStateMachine_STATE_IGNORE,KobukiStateMachine_STATE_IGNORE,KobukiStateMachine_STATE_turnRight,KobukiStateMachine_STATE_IGNORE,KobukiStateMachine_STATE_IGNORE,KobukiStateMachine_STATE_IGNORE,KobukiStateMachine_STATE_IGNORE,KobukiStateMachine_STATE_IGNORE,KobukiStateMachine_STATE_IGNORE,KobukiStateMachine_STATE_IGNORE,KobukiStateMachine_STATE_run2,KobukiStateMachine_STATE_IGNORE,KobukiStateMachine_STATE_IGNORE,KobukiStateMachine_STATE_IGNORE,KobukiStateMachine_STATE_IGNORE,KobukiStateMachine_STATE_IGNORE,KobukiStateMachine_STATE_turnLeft,KobukiStateMachine_STATE_IGNORE,KobukiStateMachine_STATE_IGNORE,KobukiStateMachine_STATE_IGNORE,KobukiStateMachine_STATE_IGNORE,KobukiStateMachine_STATE_IGNORE,KobukiStateMachine_STATE_IGNORE,KobukiStateMachine_STATE_IGNORE,KobukiStateMachine_STATE_run1
 };
 
 int KobukiStateMachine::execute(MEXUEvent *event) {
@@ -61,14 +79,24 @@ int KobukiStateMachine::execute(MEXUEvent *event) {
     
     break;
     
-  case KobukiStateMachine_STATE_run: /* run */
-    kobukimanager.goStraight( 0.3, 1.0);
+  case KobukiStateMachine_STATE_run1: /* run1 */
+    kobukimanager->goStraight( 0.5, 1.0);
     
     break;
     
-  case KobukiStateMachine_STATE_turn: /* turn */
-    kobukimanager.changeDirection( 1.3, 180);
-
+  case KobukiStateMachine_STATE_turnRight: /* turnRight */
+    kobukimanager->changeDirection( -3.3, 180 );
+    
+    break;
+    
+  case KobukiStateMachine_STATE_run2: /* run2 */
+    //kobukimanager->goStraight( 0.5, 1.0);
+    
+    break;
+    
+  case KobukiStateMachine_STATE_turnLeft: /* turnLeft */
+    kobukimanager->changeDirection( 3.3, 180 );
+    
     break;
     
   }
