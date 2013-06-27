@@ -4,57 +4,11 @@
 
 
 /*============================================================================
- * tmp class
- *
- */
-const int tmp::matrix[] = {
-tmp_STATE_IGNORE,tmp_STATE_scissors,tmp_STATE_IGNORE,tmp_STATE_IGNORE,tmp_STATE_IGNORE,tmp_STATE_IGNORE,tmp_STATE_IGNORE,tmp_STATE_IGNORE,tmp_STATE_IGNORE,tmp_STATE_paper,tmp_STATE_IGNORE,tmp_STATE_IGNORE,tmp_STATE_IGNORE,tmp_STATE_IGNORE,tmp_STATE_IGNORE,tmp_STATE_IGNORE,tmp_STATE_IGNORE,tmp_STATE_stone,tmp_STATE_IGNORE,tmp_STATE_IGNORE,tmp_STATE_IGNORE
-};
-
-int tmp::execute(MEXUEvent *event) {
-  if (!event) {
-    return 0;
-  }                                        
-
-  int next_state = matrix[current_state * 7 + event->event_id];
-    
-  if(next_state == -1) {
-    return 0;
-    }
-
-  printf("tmp: event %d, state: %d -> %d\n",
-    event->event_id, current_state, next_state);
-    
-  current_state = next_state;
-    
-  switch(current_state) {
-    
-  case tmp_STATE_stone: /* stone */
-  //  win scissors
-//lose paper
-    break;
-    
-  case tmp_STATE_scissors: /* scissors */
-  //  win paper
-//lose stone
-    break;
-    
-  case tmp_STATE_paper: /* paper */
-  //  win stone
-//lose scissors
-    break;
-    
-  }
-  return 0;
-}
-
-
-/*============================================================================
  * KobukiStateMachine class
  *
  */
 const int KobukiStateMachine::matrix[] = {
-KobukiStateMachine_STATE_IGNORE,KobukiStateMachine_STATE_IGNORE,KobukiStateMachine_STATE_IGNORE,KobukiStateMachine_STATE_IGNORE,KobukiStateMachine_STATE_run1,KobukiStateMachine_STATE_IGNORE,KobukiStateMachine_STATE_IGNORE,KobukiStateMachine_STATE_IGNORE,KobukiStateMachine_STATE_IGNORE,KobukiStateMachine_STATE_IGNORE,KobukiStateMachine_STATE_IGNORE,KobukiStateMachine_STATE_IGNORE,KobukiStateMachine_STATE_turnRight,KobukiStateMachine_STATE_IGNORE,KobukiStateMachine_STATE_IGNORE,KobukiStateMachine_STATE_IGNORE,KobukiStateMachine_STATE_IGNORE,KobukiStateMachine_STATE_IGNORE,KobukiStateMachine_STATE_IGNORE,KobukiStateMachine_STATE_IGNORE,KobukiStateMachine_STATE_run2,KobukiStateMachine_STATE_IGNORE,KobukiStateMachine_STATE_IGNORE,KobukiStateMachine_STATE_IGNORE,KobukiStateMachine_STATE_IGNORE,KobukiStateMachine_STATE_IGNORE,KobukiStateMachine_STATE_turnLeft,KobukiStateMachine_STATE_IGNORE,KobukiStateMachine_STATE_IGNORE,KobukiStateMachine_STATE_IGNORE,KobukiStateMachine_STATE_IGNORE,KobukiStateMachine_STATE_IGNORE,KobukiStateMachine_STATE_IGNORE,KobukiStateMachine_STATE_IGNORE,KobukiStateMachine_STATE_run1
+KobukiStateMachine_STATE_mapping,KobukiStateMachine_STATE_IGNORE,KobukiStateMachine_STATE_IGNORE,KobukiStateMachine_STATE_IGNORE,KobukiStateMachine_STATE_IGNORE,KobukiStateMachine_STATE_IGNORE,KobukiStateMachine_STATE_changeDrection,KobukiStateMachine_STATE_stop,KobukiStateMachine_STATE_IGNORE,KobukiStateMachine_STATE_IGNORE,KobukiStateMachine_STATE_IGNORE,KobukiStateMachine_STATE_IGNORE,KobukiStateMachine_STATE_IGNORE,KobukiStateMachine_STATE_running,KobukiStateMachine_STATE_IGNORE,KobukiStateMachine_STATE_foundObstacle,KobukiStateMachine_STATE_IGNORE,KobukiStateMachine_STATE_IGNORE,KobukiStateMachine_STATE_IGNORE,KobukiStateMachine_STATE_mapping,KobukiStateMachine_STATE_IGNORE,KobukiStateMachine_STATE_decideNext,KobukiStateMachine_STATE_IGNORE,KobukiStateMachine_STATE_IGNORE,KobukiStateMachine_STATE_IGNORE,KobukiStateMachine_STATE_IGNORE,KobukiStateMachine_STATE_IGNORE,KobukiStateMachine_STATE_IGNORE,KobukiStateMachine_STATE_IGNORE,KobukiStateMachine_STATE_decideNext,KobukiStateMachine_STATE_IGNORE,KobukiStateMachine_STATE_IGNORE,KobukiStateMachine_STATE_IGNORE,KobukiStateMachine_STATE_IGNORE,KobukiStateMachine_STATE_IGNORE
 };
 
 int KobukiStateMachine::execute(MEXUEvent *event) {
@@ -62,7 +16,7 @@ int KobukiStateMachine::execute(MEXUEvent *event) {
     return 0;
   }                                        
 
-  int next_state = matrix[current_state * 7 + event->event_id];
+  int next_state = matrix[current_state * 5 + event->event_id];
     
   if(next_state == -1) {
     return 0;
@@ -75,27 +29,46 @@ int KobukiStateMachine::execute(MEXUEvent *event) {
     
   switch(current_state) {
     
-  case KobukiStateMachine_STATE_wait: /* wait */
+  case KobukiStateMachine_STATE_start: /* start */
     
     break;
     
-  case KobukiStateMachine_STATE_run1: /* run1 */
-    kobukimanager->goStraight( 0.5, 1.0);
-    
+  case KobukiStateMachine_STATE_decideNext: /* decideNext */
+    // decide next block.
+next_block = map.getNextBlock();
+if( next_block == NULL ) goFinish();
+else goNext();
     break;
     
-  case KobukiStateMachine_STATE_turnRight: /* turnRight */
-    kobukimanager->changeDirection( -3.3, 180 );
-    
+  case KobukiStateMachine_STATE_changeDrection: /* changeDrection */
+    // turn to next block.
+turnAngle = map.getTurnAngle(next_block);
+kobukimanager->changeDirection( 2.0, turnAngle );
     break;
     
-  case KobukiStateMachine_STATE_run2: /* run2 */
-    //kobukimanager->goStraight( 0.5, 1.0);
-    
+  case KobukiStateMachine_STATE_running: /* running */
+    // running to next block.
+runDistance = map.getNextDistance(next_block);
+kobukimanager->goStraight( 0.2, runDistance );
     break;
     
-  case KobukiStateMachine_STATE_turnLeft: /* turnLeft */
-    kobukimanager->changeDirection( 3.3, 180 );
+  case KobukiStateMachine_STATE_mapping: /* mapping */
+    // check current block, nothing or IR.
+map.setCurrentBlock(next_block);
+map.setMarkBlock(next_block, BLANK);
+goNext();
+    break;
+    
+  case KobukiStateMachine_STATE_foundObstacle: /* foundObstacle */
+    // if find a obstacle, check next block and go back to current block.
+map.setMarkBlock(next_block, OBSTACLE);
+next_block = map.getCurrentBlock();
+runDistance = map.getNextDistance(next_block);
+kobukimanager->goStraight( -0.2, runDistance );
+
+    break;
+    
+  case KobukiStateMachine_STATE_stop: /* stop */
     
     break;
     

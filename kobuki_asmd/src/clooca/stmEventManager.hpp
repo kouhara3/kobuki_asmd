@@ -22,12 +22,12 @@ public:
     RIGHT_NEAR_IR_FOUND,
     RIGHT_NEAR_IR_MISSED,
 */
-    BUMPER_PRESSED = 4,
-    BUMPER_RELEASED = 0,
-    IR_FOUND = 0,
-    IR_MISSED = 0,
-    RUN_REACHED = 5,
-    TURN_REACHED = 6,
+    BUMPER_PRESSED = 0,
+    BUMPER_RELEASED = -1,
+    IR_FOUND = -1,
+    IR_MISSED = -1,
+    RUN_REACHED = 4,
+    TURN_REACHED = 3,
   };
 
   STMEventManager(){

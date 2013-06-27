@@ -16,7 +16,7 @@
 /*****************************************************************************
 ** Define
 *****************************************************************************/
-#define MINIMUM_SIZE 50
+#define MINIMUM_SIZE 0.5
 /*****************************************************************************
 ** Classes
 *****************************************************************************/
@@ -26,19 +26,23 @@ public:
   Map(){
     this->max.setCoordinate(0,0);
     this->current_block = NULL;
+    //blockListInit();
   }
-  Map(int coord_x, int coord_y){
+  Map(double coord_x, double coord_y){
     this->max.setCoordinate(coord_x, coord_y);
     this->current_block = NULL;
+    //blockListInit();
   }
-  void resize(Coordinate coord){
-    this->max = coord;
+  void resize(double coord_x, double coord_y){
+    this->max.setCoordinate(coord_x, coord_y);
     this->current_block = NULL;
+    blockListInit();
   }
 
   bool blockListInit(){
+    block_list.clear();
 
-    Coordinate coord;
+    
     int idx_x = this->max.getCoordinateX()/DEFAULT_BLOCK_LENGTH;
     int idx_y = this->max.getCoordinateY()/DEFAULT_BLOCK_LENGTH;
     std::cout << "idx_x = " << idx_x << std::endl; 
@@ -51,7 +55,8 @@ public:
         std::vector<Block> list;
       
         for(int j = 0; j<idx_y; j++) {
-          coord.setCoordinate(20 + i*DEFAULT_BLOCK_LENGTH, 20 + j*DEFAULT_BLOCK_LENGTH);
+          Coordinate coord;
+          coord.setCoordinate(i*DEFAULT_BLOCK_LENGTH, j*DEFAULT_BLOCK_LENGTH);
           Block block(coord, DEFAULT_BLOCK_LENGTH, i, j);
   	  list.push_back(block);
         }
@@ -106,38 +111,51 @@ public:
     this->distance_to_next = pow( pow(dist_x, 2.0)+pow(dist_y, 2.0), 0.5);
 ////////////////////////////////////////////////////////////////////////////////////////////
 */
+    std::cout << "Next Position: " << (float)next_block->getCenterPoint().getCoordinateX()
+        << " , " << (float)next_block->getCenterPoint().getCoordinateY() << std::endl;
     return next_block;
   }
 
 //Get angle will be turned from now to next block
-  double getTurnAngle(){
-    Block* next_block = this->getNextBlock();
+  double getTurnAngle(Block* next_block){
+    //Block* next_block = this->getNextBlock();
     if(next_block == NULL){
       return 0;
     }
     
     //double dist_x = this->current_block->centerPoint.getCoordinateX() - next_block->centerPoint.getCoordinateX();
     //double dist_y = this->current_block->centerPoint.getCoordinateX() - next_block->centerPoint.getCoordinateX();
-    double dist_x = this->manager.getPose().x() - next_block->getCenterPoint().getCoordinateX();
-    double dist_y = this->manager.getPose().x() - next_block->getCenterPoint().getCoordinateY();
-    double angle_now = this->manager.getPose().heading().degrees();
+    ecl::Pose2D<double> pose_now = this->manager.getPose();
+    Coordinate next_point = next_block->getCenterPoint();
+    double dist_x = next_point.getCoordinateX() - pose_now.x();
+    double dist_y = next_point.getCoordinateY() - pose_now.y();
+    double angle_now = pose_now.heading().degrees();
 
-    double turn_angle = (atan(dist_x/dist_y)/ecl::pi)*180 - angle_now;
-    
+    double turn_angle = (atan2(dist_y,dist_x)/ecl::pi)*180 - angle_now;
+    std::cout << "angle: " << angle_now << std::endl;
+    std::cout << "turn_angle: " << turn_angle << std::endl;
+    if((turn_angle < 5.0) && (turn_angle > -5.0)) turn_angle = 0;
+    if(turn_angle>180.0) turn_angle = turn_angle - 360.0;
+    if(turn_angle<-180.0) turn_angle = turn_angle + 360.0;
     return turn_angle;
   }
 
 //Get distance will be advaced from now to next block
-  double getNextDistance(){
+  double getNextDistance(Block* next_block){
 
-    Block* next_block = this->getNextBlock();
+    //Block* next_block = this->getNextBlock();
     if(next_block == NULL){
       return 0;
     }
+    
+    ecl::Pose2D<double> pose_now = this->manager.getPose();
+    Coordinate next_point = next_block->getCenterPoint();
+    double dist_x = next_point.getCoordinateX() - pose_now.x();
+    double dist_y = next_point.getCoordinateY() - pose_now.y();
+    
 
-    double dist_x = this->manager.getPose().x() - next_block->getCenterPoint().getCoordinateX();
-    double dist_y = this->manager.getPose().x() - next_block->getCenterPoint().getCoordinateY();
     double dist = pow( pow(dist_x, 2.0)+pow(dist_y, 2.0), 0.5);
+    std::cout << "x,y,distance: " << dist_x << "," << dist_y << "," << dist << std::endl;
 
     return dist;
   }
@@ -158,7 +176,11 @@ public:
   }
   void setCurrentBlock(Block* b){
     this->current_block = b;
-    current_block->setHasKobuki(true);
+    //current_block->setHasKobuki(true);
+    return;
+  }
+  void setMarkBlock(Block* b, Mark m){
+    b->setMark(m);
     return;
   }
   KobukiManager* getKobukiManager(){

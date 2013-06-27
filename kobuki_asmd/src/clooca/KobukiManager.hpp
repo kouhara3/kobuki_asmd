@@ -173,8 +173,14 @@ public:
   void changeDirection(double _dirct_speed, double angle) {
     stopRun();
     rundata.stri_speed = 0;
-    rundata.dirct_speed = _dirct_speed;
-    rundata.dth_goal = angle * ecl::pi /180;
+    if( angle >= 0 ){
+      rundata.dirct_speed = _dirct_speed;
+      rundata.dth_goal = angle * ecl::pi /180;
+    }
+    else {
+      rundata.dirct_speed = -_dirct_speed;
+      rundata.dth_goal = -angle * ecl::pi /180;  
+    }
     kobuki.setBaseControl( rundata.stri_speed, rundata.dirct_speed ); // dirct_speed: to control the speed of dirction
     rundata.state = TURN;
     return;
@@ -193,11 +199,13 @@ public:
   void runUpdate( ecl::Pose2D<double> pose_update ){
     rundata.dx += pose_update.x();
     rundata.dth += pose_update.heading();
-    std::cout << rundata.state << "," << rundata.dx << std::endl;
-    std::cout << rundata.stri_speed << "," << rundata.dirct_speed << std::endl; 
+    //std::cout << rundata.state << "," << rundata.dx << std::endl;
+    //std::cout << rundata.stri_speed << "," << rundata.dirct_speed << std::endl; 
 
     if( rundata.state == RUN ){
       if (rundata.dx >= rundata.dx_goal) {
+        std::cout << "Target Distance: " << rundata.dx_goal << std::endl;
+        std::cout << "Run Distance: " << rundata.dx << std::endl;
         stopRun();
       } else if (rundata.dx <= -rundata.dx_goal) {
         stopRun();
@@ -205,8 +213,13 @@ public:
     }
     else if( rundata.state == TURN ){
       if (rundata.dth >= rundata.dth_goal) {
+        //std::cout << "Target Angle: " << rundata.dth_goal * 180 / ecl::pi << std::endl;
+        std::cout << "Turned Angle: " << rundata.dth * 180 / ecl::pi << std::endl;
         stopRun();
+
       } else if (rundata.dth <= -rundata.dth_goal) {
+        //std::cout << "Target Angle: " << rundata.dth_goal * 180 / ecl::pi << std::endl;
+        std::cout << "Turned Angle: " << rundata.dth * 180 / ecl::pi << std::endl;
         stopRun();
       }
     }

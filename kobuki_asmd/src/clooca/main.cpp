@@ -78,7 +78,7 @@ int main (int argc, char *argv[])
       event.checkEvent( stm );
       eventManager.execute();
       sleep();
-      pose = stm.kobukimanager->getPose();
+      //pose = stm.kobukimanager->getPose();
       //std::cout << "current pose: [" << pose.x() << ", " << pose.y() << ", " << pose.heading() << "]" << std::endl;
     }
   } catch ( ecl::StandardException &e ) {
