@@ -24,7 +24,10 @@ int KobukiStateMachine::execute(MEXUEvent *event) {
 
   printf("KobukiStateMachine: event %d, state: %d -> %d\n",
     event->event_id, current_state, next_state);
+  //printf("KobukiStateMachine: event %s, state: %s -> %s\n",
+  //  eventname[event->event_id], statename[current_state], statename[next_state]);
     
+  
   current_state = next_state;
     
   switch(current_state) {
@@ -69,7 +72,8 @@ kobukimanager->goStraight( -0.2, runDistance );
     break;
     
   case KobukiStateMachine_STATE_stop: /* stop */
-    
+    kobukimanager->stopRun();
+    map.showMap();
     break;
     
   }

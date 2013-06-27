@@ -111,8 +111,8 @@ public:
     this->distance_to_next = pow( pow(dist_x, 2.0)+pow(dist_y, 2.0), 0.5);
 ////////////////////////////////////////////////////////////////////////////////////////////
 */
-    std::cout << "Next Position: " << (float)next_block->getCenterPoint().getCoordinateX()
-        << " , " << (float)next_block->getCenterPoint().getCoordinateY() << std::endl;
+    //std::cout << "Next Position: " << (float)next_block->getCenterPoint().getCoordinateX()
+    //    << " , " << (float)next_block->getCenterPoint().getCoordinateY() << std::endl;
     return next_block;
   }
 
@@ -132,11 +132,13 @@ public:
     double angle_now = pose_now.heading().degrees();
 
     double turn_angle = (atan2(dist_y,dist_x)/ecl::pi)*180 - angle_now;
-    std::cout << "angle: " << angle_now << std::endl;
-    std::cout << "turn_angle: " << turn_angle << std::endl;
+
     if((turn_angle < 5.0) && (turn_angle > -5.0)) turn_angle = 0;
     if(turn_angle>180.0) turn_angle = turn_angle - 360.0;
     if(turn_angle<-180.0) turn_angle = turn_angle + 360.0;
+    turn_angle = turn_angle * 0.60;
+    //std::cout << "angle: " << angle_now << std::endl;
+    //std::cout << "turn_angle: " << turn_angle << std::endl;
     return turn_angle;
   }
 
@@ -153,9 +155,10 @@ public:
     double dist_x = next_point.getCoordinateX() - pose_now.x();
     double dist_y = next_point.getCoordinateY() - pose_now.y();
     
-
     double dist = pow( pow(dist_x, 2.0)+pow(dist_y, 2.0), 0.5);
-    std::cout << "x,y,distance: " << dist_x << "," << dist_y << "," << dist << std::endl;
+    dist = dist / 1.08;
+
+    //std::cout << "x,y,distance: " << dist_x << "," << dist_y << "," << dist << std::endl;
 
     return dist;
   }
@@ -185,6 +188,27 @@ public:
   }
   KobukiManager* getKobukiManager(){
     return &(this->manager);
+  }
+  
+
+  void showMap(){
+    int idx_x = this->block_list.size();
+    int idx_y = this->block_list[0].size();
+    std::cout << "=====Show now map construct !=====" << std::endl << std::endl;
+    for(int i = idx_y-1; i>-1; i--){
+      for(int j = 0; j<idx_x ; j++){
+        switch(block_list[j][i].getMark()){
+          case UNKNOWN: std::cout << "? ";	break;
+
+          case BLANK:	std::cout << "O ";	break;
+
+          case OBSTACLE:std::cout << "X ";	break;
+        }
+      }
+      std::cout << std::endl;
+    }
+    std::cout << "==================================" << std::endl << std::endl;
+    return;
   }
 private:
   Coordinate max;

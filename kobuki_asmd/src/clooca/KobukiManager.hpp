@@ -149,7 +149,7 @@ public:
    * Get now pose of kobuki.
    */ 
   ecl::Pose2D<double> getPose() {
-    std::cout << "[" << pose.x() << ", " << pose.y() << ", " << pose.heading() << "]" << std::endl;
+    std::cout << "Current Position: [" << pose.x() << ", " << pose.y() << ", " << pose.heading().degrees() << "]" << std::endl;
     return this->pose;
   }
 
@@ -204,8 +204,8 @@ public:
 
     if( rundata.state == RUN ){
       if (rundata.dx >= rundata.dx_goal) {
-        std::cout << "Target Distance: " << rundata.dx_goal << std::endl;
-        std::cout << "Run Distance: " << rundata.dx << std::endl;
+        //std::cout << "Target Distance: " << rundata.dx_goal << std::endl;
+        //std::cout << "Run Distance: " << rundata.dx << std::endl;
         stopRun();
       } else if (rundata.dx <= -rundata.dx_goal) {
         stopRun();
@@ -214,12 +214,12 @@ public:
     else if( rundata.state == TURN ){
       if (rundata.dth >= rundata.dth_goal) {
         //std::cout << "Target Angle: " << rundata.dth_goal * 180 / ecl::pi << std::endl;
-        std::cout << "Turned Angle: " << rundata.dth * 180 / ecl::pi << std::endl;
+        //std::cout << "Turned Angle: " << rundata.dth * 180 / ecl::pi << std::endl;
         stopRun();
 
       } else if (rundata.dth <= -rundata.dth_goal) {
         //std::cout << "Target Angle: " << rundata.dth_goal * 180 / ecl::pi << std::endl;
-        std::cout << "Turned Angle: " << rundata.dth * 180 / ecl::pi << std::endl;
+        //std::cout << "Turned Angle: " << rundata.dth * 180 / ecl::pi << std::endl;
         stopRun();
       }
     }

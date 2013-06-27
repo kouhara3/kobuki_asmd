@@ -61,6 +61,9 @@ public:
 
   double runDistance;
 
+  //std::vector<std::string> statename;
+  //std::vector<std::string> eventname;
+
   /* methods */                          
   KobukiStateMachine() : StateMachine(){
       eventManager.addSTM(this);
@@ -71,6 +74,10 @@ public:
 	  next_block = map.getCurrentBlock();
 	  turnAngle = 0;
 	  runDistance = 0;
+  //statename.resize(7);
+  //eventname.resize(5);
+  //statename = { "start", "decideNext", "changeDirection", "running", "mapping", "foundObstacle", "stop" };
+  //eventname = { "BumperPressed", "Next", "Finish", "TurnReached", "RunReached" };
   }
 
   ~KobukiStateMachine() {}
