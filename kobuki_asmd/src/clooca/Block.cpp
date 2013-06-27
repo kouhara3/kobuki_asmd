@@ -12,7 +12,7 @@
 /*****************************************************************************
 ** Define
 *****************************************************************************/
-#define DEFAULT_BLOCK_LENGTH 0.4
+#define DEFAULT_BLOCK_LENGTH 40
 #define DEFAULT_COORD_X 0
 #define DEFAULT_COORD_Y 0
 
@@ -24,9 +24,8 @@ enum Mark
 	 UNKNOWN,
          BLANK,
          OBSTACLE,
-         INFRARED,
          SUR_BLANK,
-         SUR_OBSTACLE
+         SUR_OBSTACLE,
 };
 
 /*****************************************************************************
@@ -46,7 +45,7 @@ public:
     this->tag_x = 0;
     this->tag_y = 0;
   }
-  Block(double coord_x, double coord_y, double length, int tag_x, int tag_y){
+  Block(float coord_x, float coord_y, int length, int tag_x, int tag_y){
     this->centerPoint.setCoordinate(coord_x, coord_y);
     this->side_length = length;
     this->mark = UNKNOWN;
@@ -54,7 +53,7 @@ public:
     this->tag_x = tag_x;
     this->tag_y = tag_y;
   }
-  Block(Coordinate coord, double length, int tag_x, int tag_y){
+  Block(Coordinate coord, int length, int tag_x, int tag_y){
     this->centerPoint = coord;
     this->side_length = length;
     this->mark = UNKNOWN;
@@ -102,7 +101,7 @@ public:
 //Private member
 private:
   Coordinate centerPoint;
-  double side_length;
+  float side_length;
   enum Mark mark;
   bool has_kobuki;
   int tag_x;

@@ -56,7 +56,7 @@ public:
 
   // Generate square motion
   void processMotion() {
-    if (dx >= 1.0 && dth >= ecl::pi/2.0) { dx=0.0; dth=0.0; kobuki.setBaseControl(0.0, 0.0); return; }
+    if (dx >= 1.0 && dth >= ecl::pi) { dx=0.0; dth=0.0; kobuki.setBaseControl(0.0, 0.0); return; }
     else if (dx >= 1.0) { kobuki.setBaseControl(0.0, 3.3); return; }
     else { kobuki.setBaseControl(0.3, 0.0); return; }
   }

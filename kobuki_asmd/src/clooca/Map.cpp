@@ -8,7 +8,6 @@
 ** Includes
 *****************************************************************************/
 #include <iostream>
-#include <math.h>
 #include <vector>
 #include "Coordinate.cpp"
 #include "KobukiManager.cpp"
@@ -26,6 +25,8 @@ public:
   Map(){
     this->max.setCoordinate(0,0);
     this->current_block = NULL;
+    //this->KobukiManager[0] = KobukiManager();
+    //this->KobukiManager[1] = KobukiManager();
   }
   Map(int coord_x, int coord_y){
     this->max.setCoordinate(coord_x, coord_y);
@@ -77,69 +78,24 @@ public:
     if(this->block_list.empty()){
       return NULL;
     }
-    
-    Block* next_block = NULL;
+
     int now_x = this->current_block->getTagX();
     int now_y = this->current_block->getTagY();
     
     if( now_y-1>=0 && this->block_list[now_x][now_y-1].isUnkonwn() ){
-      next_block = &this->block_list[now_x][now_y-1];
+      return (&this->block_list[now_x][now_y-1]);
     } else if( now_x+1<this->block_list.size() && this->block_list[now_x+1][now_y].isUnkonwn()){
-      next_block = &this->block_list[now_x+1][now_y];
+      return (&this->block_list[now_x+1][now_y]);
     } else if( now_x-1>=0 && this->block_list[now_x-1][now_y].isUnkonwn()){
-      next_block = &this->block_list[now_x-1][now_y];
+      return (&this->block_list[now_x-1][now_y]);
     } else if( now_y+1< this->block_list[now_x].size() && !this->block_list[now_x][now_y+1].isObstacle()){
-      next_block = &this->block_list[now_x][now_y+1];
+      return (&this->block_list[now_x][now_y+1]);
     } else if( now_x-1>=0 ){
-      next_block = &this->block_list[now_x-1][now_y];
+      return (&this->block_list[now_x-1][now_y]);
     } else{
-      next_block = NULL;
-    }
-/*
-//////This block can provide a instant value of angle and distance to be advanced///////////
-
-    double dist_x = this->kobuki.getPose().x() - next_block->centerPoint.getCoordinateX();
-    double dist_y = this->kobuki.getPose().x() - next_block->centerPoint.getCoordinateY();
-    double angle_now = this->kobuki.getPose().degrees();
-
-    this->angle_to_next = (atan(dist_x/dist_y)/ecl::pi)*180 - angle_now;
-    this->distance_to_next = pow( pow(dist_x, 2.0)+pow(dist_y, 2.0), 0.5);
-////////////////////////////////////////////////////////////////////////////////////////////
-*/
-    return next_block;
-  }
-
-//Get angle will be turned from now to next block
-  double getTurnAngle(){
-    Block* next_block = this->getNextBlock();
-    if(next_block == NULL){
-      return 0;
-    }
-    
-    //double dist_x = this->current_block->centerPoint.getCoordinateX() - next_block->centerPoint.getCoordinateX();
-    //double dist_y = this->current_block->centerPoint.getCoordinateX() - next_block->centerPoint.getCoordinateX();
-    double dist_x = this->kobuki.getPose().x() - next_block->centerPoint.getCoordinateX();
-    double dist_y = this->kobuki.getPose().x() - next_block->centerPoint.getCoordinateY();
-    double angle_now = this->kobuki.getPose().degrees();
-
-    double turn_angle = (atan(dist_x/dist_y)/ecl::pi)*180 - angle_now;
-    
-    return turn_angle;
-  }
-
-//Get distance will be advaced from now to next block
-  double getNextDistance(){
-
-    Block* next_block = this->getNextBlock();
-    if(next_block == NULL){
-      return 0;
+      return NULL;
     }
 
-    double dist_x = this->kobuki.getPose().x() - next_block->centerPoint.getCoordinateX();
-    double dist_y = this->kobuki.getPose().x() - next_block->centerPoint.getCoordinateY();
-    double dist = pow( pow(dist_x, 2.0)+pow(dist_y, 2.0), 0.5);
-
-    return dist;
   }
 
   void getMapInfo(){
@@ -158,16 +114,13 @@ public:
   }
   void setCurrentBlock(Block* b){
     this->current_block = b;
-    current_block->setHasKobuki(true);
     return;
   }
 private:
   Coordinate max;
   std::vector< std::vector<Block> > block_list;
   Block* current_block;
-  double angle_to_next;
-  double distance_to_next;
-  KobukiManager manager;
+  //KobukiManager[2] Manager;
  };
 
 /*****************************************************************************
