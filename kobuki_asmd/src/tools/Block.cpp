@@ -1,5 +1,5 @@
 /**
- * @file /kobuki_driver/src/test/Block.cpp
+ * @file /kobuki_driver/src/toola/Block.cpp
  *
  * @Coordinate.
  **/
@@ -12,7 +12,7 @@
 /*****************************************************************************
 ** Define
 *****************************************************************************/
-#define DEFAULT_BLOCK_LENGTH 0.4
+#define DEFAULT_BLOCK_LENGTH 0.5
 #define DEFAULT_COORD_X 0
 #define DEFAULT_COORD_Y 0
 
@@ -24,9 +24,22 @@ enum Mark
 	 UNKNOWN,
          BLANK,
          OBSTACLE,
+	 WALL,
          INFRARED,
          SUR_BLANK,
          SUR_OBSTACLE
+};
+
+/*****************************************************************************
+** Structs
+*****************************************************************************/
+
+struct Borders
+{
+	float left;
+	float right;
+	float up;
+	float down;
 };
 
 /*****************************************************************************
@@ -35,7 +48,7 @@ enum Mark
 
 class Block {
 
-//Public member
+//Public members
 public:
 //Constructors
   Block(){
@@ -45,6 +58,7 @@ public:
     this->has_kobuki = false;
     this->tag_x = 0;
     this->tag_y = 0;
+    this->borders = NULL;
   }
   Block(double coord_x, double coord_y, double length, int tag_x, int tag_y){
     this->centerPoint.setCoordinate(coord_x, coord_y);
@@ -53,6 +67,7 @@ public:
     this->has_kobuki = false;
     this->tag_x = tag_x;
     this->tag_y = tag_y;
+    this->borders = NULL;
   }
   Block(Coordinate coord, double length, int tag_x, int tag_y){
     this->centerPoint = coord;
@@ -61,6 +76,7 @@ public:
     this->has_kobuki = false;
     this->tag_x = tag_x;
     this->tag_y = tag_y;
+    this->borders = NULL;
   }
 //Get methods
   Coordinate getCenterPoint(){
@@ -90,6 +106,7 @@ public:
   bool isObstacle(){
     return (this->mark==OBSTACLE?true:false);
   }
+  
 //Set methods
   void setMark(enum Mark m){
     this->mark = m;
@@ -99,6 +116,16 @@ public:
     this->has_kobuki = b;
     return;
   }
+
+  struct Edges
+  {
+	Block* right_edge;
+	Block* left_edge;
+	Block* up_edge;
+	Block* down_edge;
+  } edges;
+  struct Borders* borders;
+
 //Private member
 private:
   Coordinate centerPoint;

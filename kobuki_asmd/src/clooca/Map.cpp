@@ -41,7 +41,6 @@ public:
 
   bool blockListInit(){
     block_list.clear();
-
     
     int idx_x = this->max.getCoordinateX()/DEFAULT_BLOCK_LENGTH;
     int idx_y = this->max.getCoordinateY()/DEFAULT_BLOCK_LENGTH;
@@ -56,7 +55,7 @@ public:
       
         for(int j = 0; j<idx_y; j++) {
           Coordinate coord;
-          coord.setCoordinate(i*DEFAULT_BLOCK_LENGTH, j*DEFAULT_BLOCK_LENGTH);
+          coord.setCoordinate(i*DEFAULT_BLOCK_LENGTH, j*(DEFAULT_BLOCK_LENGTH-0.04));
           Block block(coord, DEFAULT_BLOCK_LENGTH, i, j);
   	  list.push_back(block);
         }
@@ -64,6 +63,27 @@ public:
         this->block_list.push_back(list);   
         list.clear(); 
       }
+
+      //Edges initialization
+      for(int i = 0; i<idx_x; i++) {
+
+        for(int j = 0; j<idx_y; j++) {
+
+	  if(j+1<idx_y) { this->block_list[i][j].edges.up_edge = (Block*) &this->block_list[i][j+1]; }
+          else  { this->block_list[i][j].edges.up_edge = NULL; }
+
+	  if(i+1<idx_x) { this->block_list[i][j].edges.right_edge = (Block*) &this->block_list[i+1][j]; }
+          else { this->block_list[i][j].edges.right_edge = NULL; }
+
+	  if(j-1>=0) { this->block_list[i][j].edges.down_edge = (Block*) &this->block_list[i][j-1]; }
+          else { this->block_list[i][j].edges.down_edge = NULL; }
+
+	  if(i-1<idx_y) { this->block_list[i][j].edges.left_edge = (Block*) &this->block_list[i-1][j]; }
+          else  { this->block_list[i][j].edges.left_edge = NULL; }
+        }
+      }
+
+
       this->current_block = (Block*) &block_list[0][0];
       block_list[0][0].setMark(BLANK);
       block_list[0][0].setHasKobuki(true);
@@ -136,7 +156,7 @@ public:
     if((turn_angle < 5.0) && (turn_angle > -5.0)) turn_angle = 0;
     if(turn_angle>180.0) turn_angle = turn_angle - 360.0;
     if(turn_angle<-180.0) turn_angle = turn_angle + 360.0;
-    turn_angle = turn_angle * 0.60;
+    turn_angle = turn_angle * 0.58;
     //std::cout << "angle: " << angle_now << std::endl;
     //std::cout << "turn_angle: " << turn_angle << std::endl;
     return turn_angle;
@@ -156,7 +176,7 @@ public:
     double dist_y = next_point.getCoordinateY() - pose_now.y();
     
     double dist = pow( pow(dist_x, 2.0)+pow(dist_y, 2.0), 0.5);
-    dist = dist / 1.08;
+    dist = dist ;
 
     //std::cout << "x,y,distance: " << dist_x << "," << dist_y << "," << dist << std::endl;
 
