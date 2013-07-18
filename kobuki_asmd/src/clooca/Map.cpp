@@ -10,6 +10,7 @@
 #include <iostream>
 #include <math.h>
 #include <vector>
+#include <queue>
 #include "Coordinate.cpp"
 #include "KobukiManager.hpp"
 #include "Block.cpp"
@@ -17,9 +18,17 @@
 ** Define
 *****************************************************************************/
 #define MINIMUM_SIZE 0.5
+#define KOBUKI_SIZE 0.35
 /*****************************************************************************
 ** Classes
 *****************************************************************************/
+
+enum Direction{
+  RIGHT,
+  LEFT,
+  UP,
+  DOWN,
+};
 
 class Map {
 public:
@@ -136,7 +145,7 @@ public:
     if((turn_angle < 5.0) && (turn_angle > -5.0)) turn_angle = 0;
     if(turn_angle>180.0) turn_angle = turn_angle - 360.0;
     if(turn_angle<-180.0) turn_angle = turn_angle + 360.0;
-    turn_angle = turn_angle * 0.60;
+    //turn_angle = turn_angle * 0.60;
     //std::cout << "angle: " << angle_now << std::endl;
     //std::cout << "turn_angle: " << turn_angle << std::endl;
     return turn_angle;
@@ -156,7 +165,7 @@ public:
     double dist_y = next_point.getCoordinateY() - pose_now.y();
     
     double dist = pow( pow(dist_x, 2.0)+pow(dist_y, 2.0), 0.5);
-    dist = dist / 1.08;
+    // dist = dist / 1.08;
 
     //std::cout << "x,y,distance: " << dist_x << "," << dist_y << "," << dist << std::endl;
 
@@ -210,13 +219,108 @@ public:
     std::cout << "==================================" << std::endl << std::endl;
     return;
   }
+
+// method for queue
+
+  void pushPath( std::vector<Block *> list ){
+    while( !qu_path.empty() ) qu_path.pop();
+    for( int i=0; i<list.size(); i++) qu_path.push( list[i] );
+    return;
+  }
+
+  Block *popPath(){
+    Block *pt;
+    if( qu_path.empty() ){
+      pt = NULL;
+    }
+    else {
+      pt = qu_path.front();
+      qu_path.pop();
+    }
+    return pt;
+  }
+
+// private functions
+
+  double getMovement( Block *block ){
+    double move = getNextDistance( block );
+    move += ( KOBUKI_SIZE / 2 ) - ( block->getSideLength() / 2 );
+    return move;
+  }
+
+  Direction getDirection(){
+    ecl::Pose2D<double> pose = this->manager.getPose();
+    double angle = pose.heading().degrees();
+    if( (angle <= 45) && ( angle > -45 ) ) return(RIGHT);   // right
+    if( (angle <= 135) && ( angle > 45 ) ) return(UP);   // up
+    if( (angle <= -135) || ( angle > 135 ) ) return(LEFT); // left
+    if( (angle <= -45) && ( angle > -135 ) ) return(DOWN);   // down
+  }
+
+  void setObstacleSize( Block *block, double move, Direction direct ){
+    // if block has not obstacle object, then create obstacle. 
+  }
+
+  void getNearestAndPath( Block* start, std::vector<Block *>& path ){
+    
+  }
+
+// functions for statemachine
+
+  void updateCurrent(){
+    current_block->setHasKobuki(false);
+    current_block = next_block;
+    current_block->setMark(BLANK);
+    current_block->setHasKobuki(true);
+    return;
+  }
+
+  bool findNext(){
+
+  }
+
+  bool isReached(){
+    return( qu_path.empty() );
+  }
+
+  void setNext(){
+    this->next_block = popPath();
+    return;
+  }
+
+  void turnToNext( double speed ){
+    double turnAngle = getTurnAngle( this->next_block );
+    manager.changeDirection( speed, turnAngle );
+  }
+
+  void RunToNext( double speed ){
+    double runDistance = getNextDistance( this->next_block );
+    manager.goStraight( speed, runDistance );
+  }
+
+  void foundObstacle(){
+    next_block->setMark(OBSTACLE);
+    double movement = getMovement( current_block );
+    Direction direction = getDirection();
+    setObstacleSize( next_block, movement, direction );
+  }
+
+  void goBackToCurrent( double speed ){
+    next_block = current_block;
+    double runDistance = getNextDistance( next_block );
+    manager.goStraight( -speed, runDistance );
+  }
+
 private:
   Coordinate max;
   std::vector< std::vector<Block> > block_list;
   Block* current_block;
-  double angle_to_next;
-  double distance_to_next;
+  Block* next_block;
+  //double angle_to_next;
+  //double distance_to_next;
   KobukiManager manager;
+  std::queue<Block *> qu_path;
+
  };
 
 /*****************************************************************************
