@@ -1,7 +1,7 @@
 /**
- * @file /kobuki_driver/src/test/Coordinate.cpp
+ * @file /kobuki_driver/src/test/MapShow.cpp
  *
- * @Map in coordinate.
+ * 
  **/
 
 /*****************************************************************************
@@ -14,10 +14,7 @@
 #include <QWidget>
 #include <QLabel>
 #include <QPainter>
-#include <QPixmap>
-#include <QPushButton>
-
-#include "Map.cpp"
+//#include "Map.cpp"
 /*****************************************************************************
 ** Classes
 *****************************************************************************/

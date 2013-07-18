@@ -47,9 +47,11 @@ public:
     kobuki::Parameters parameters;
     parameters.sigslots_namespace = "/mobile_base"; // configure the first part of the sigslot namespace
     parameters.device_port = "/dev/kobuki";         // the serial port to connect to (windows COM1..)
+    parameters.enable_acceleration_limiter = false;
     std::cout<< "Kobuki parameter ok" << std::endl;
     // configure other parameters here
     kobuki.init(parameters);
+    kobuki.enable();
     std::cout<< "Kobuki init ok" << std::endl;
     slot_stream_data.connect("/mobile_base/stream_data");
     std::cout<< "Kobuki connect ok" << std::endl;

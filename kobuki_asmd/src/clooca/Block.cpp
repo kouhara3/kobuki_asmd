@@ -30,6 +30,18 @@ enum Mark
 };
 
 /*****************************************************************************
+** Structs
+*****************************************************************************/
+
+struct Borders
+{
+	float left;
+	float right;
+	float up;
+	float down;
+};
+
+/*****************************************************************************
 ** Classes
 *****************************************************************************/
 
@@ -45,6 +57,7 @@ public:
     this->has_kobuki = false;
     this->tag_x = 0;
     this->tag_y = 0;
+    this->borders = NULL;
   }
   Block(double coord_x, double coord_y, double length, int tag_x, int tag_y){
     this->centerPoint.setCoordinate(coord_x, coord_y);
@@ -53,6 +66,7 @@ public:
     this->has_kobuki = false;
     this->tag_x = tag_x;
     this->tag_y = tag_y;
+    this->borders = NULL;
   }
   Block(Coordinate coord, double length, int tag_x, int tag_y){
     this->centerPoint = coord;
@@ -61,6 +75,7 @@ public:
     this->has_kobuki = false;
     this->tag_x = tag_x;
     this->tag_y = tag_y;
+    this->borders = NULL;
   }
 //Get methods
   Coordinate getCenterPoint(){
@@ -99,6 +114,16 @@ public:
     this->has_kobuki = b;
     return;
   }
+
+  struct Edges
+  {
+	Block* right_edge;
+	Block* left_edge;
+	Block* up_edge;
+	Block* down_edge;
+  } edges;
+  struct Borders* borders;
+
 //Private member
 private:
   Coordinate centerPoint;
