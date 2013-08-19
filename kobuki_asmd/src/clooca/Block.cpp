@@ -24,9 +24,14 @@ enum Mark
 	 UNKNOWN,
          BLANK,
          OBSTACLE,
-         INFRARED,
          SUR_BLANK,
          SUR_OBSTACLE
+};
+
+enum IRMark
+{
+         NOT_EXIST,
+         EXIST
 };
 
 /*****************************************************************************
@@ -54,6 +59,7 @@ public:
     this->centerPoint.setCoordinate(DEFAULT_COORD_X, DEFAULT_COORD_Y);
     this->side_length = DEFAULT_BLOCK_LENGTH;
     this->mark = UNKNOWN;
+    this->irmark = NOT_EXIST;
     this->has_kobuki = false;
     this->tag_x = 0;
     this->tag_y = 0;
@@ -63,6 +69,7 @@ public:
     this->centerPoint.setCoordinate(coord_x, coord_y);
     this->side_length = length;
     this->mark = UNKNOWN;
+    this->irmark = NOT_EXIST;
     this->has_kobuki = false;
     this->tag_x = tag_x;
     this->tag_y = tag_y;
@@ -72,6 +79,7 @@ public:
     this->centerPoint = coord;
     this->side_length = length;
     this->mark = UNKNOWN;
+    this->irmark = NOT_EXIST;
     this->has_kobuki = false;
     this->tag_x = tag_x;
     this->tag_y = tag_y;
@@ -86,6 +94,9 @@ public:
   }
   enum Mark getMark(){
     return this->mark;
+  }
+  enum IRMark getIRMark(){
+    return this->irmark;
   }
   bool hasKobuki(){
     return has_kobuki;
@@ -110,6 +121,10 @@ public:
     this->mark = m;
     return;
   }
+  void setIRMark(enum IRMark ir){
+    this->irmark = ir;
+    return;
+  }
   void setHasKobuki(bool b){
     this->has_kobuki = b;
     return;
@@ -129,6 +144,7 @@ private:
   Coordinate centerPoint;
   double side_length;
   enum Mark mark;
+  enum IRMark irmark;
   bool has_kobuki;
   int tag_x;
   int tag_y;
