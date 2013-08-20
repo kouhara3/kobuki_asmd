@@ -24,7 +24,7 @@ enum Mark
 	 UNKNOWN,
          BLANK,
          OBSTACLE,
-         INFRARED,
+	 WALL,
          SUR_BLANK,
          SUR_OBSTACLE
 };
