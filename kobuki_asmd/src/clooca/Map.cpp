@@ -14,6 +14,7 @@
 #include "Coordinate.cpp"
 #include "KobukiManager.hpp"
 #include "Block.cpp"
+#include "mapgraph.hpp"
 /*****************************************************************************
 ** Define
 *****************************************************************************/
@@ -73,25 +74,13 @@ public:
         list.clear(); 
       }
 
-      //Edges initialization
+      // edge initialize
+      mapgraph.setSize( idx_x, idx_y );
       for(int i = 0; i<idx_x; i++) {
-
         for(int j = 0; j<idx_y; j++) {
-
-	  if(j+1<idx_y) { this->block_list[i][j].edges.up_edge = (Block*) &this->block_list[i][j+1]; }
-          else  { this->block_list[i][j].edges.up_edge = NULL; }
-
-	  if(i+1<idx_x) { this->block_list[i][j].edges.right_edge = (Block*) &this->block_list[i+1][j]; }
-          else { this->block_list[i][j].edges.right_edge = NULL; }
-
-	  if(j-1>=0) { this->block_list[i][j].edges.down_edge = (Block*) &this->block_list[i][j-1]; }
-          else { this->block_list[i][j].edges.down_edge = NULL; }
-
-	  if(i-1<idx_y) { this->block_list[i][j].edges.left_edge = (Block*) &this->block_list[i-1][j]; }
-          else  { this->block_list[i][j].edges.left_edge = NULL; }
+          mapgraph.setBlock( i, j , &this->block_list[i][j]);
         }
       }
-
 
       this->current_block = (Block*) &block_list[0][0];
       block_list[0][0].setMark(BLANK);
@@ -129,21 +118,22 @@ public:
     } else{
       next_block = NULL;
     }
-/*
+
 //////This block can provide a instant value of angle and distance to be advanced///////////
-
-    double dist_x = this->manager.getPose().x() - next_block->getCenterPoint().getCoordinateX();
-    double dist_y = this->manager.getPose().x() - next_block->getCenterPoint().getCoordinateY();
-    double angle_now = this->manager.getPose().degrees();
-
-    this->angle_to_next = (atan(dist_x/dist_y)/ecl::pi)*180 - angle_now;
-    this->distance_to_next = pow( pow(dist_x, 2.0)+pow(dist_y, 2.0), 0.5);
+//
+//    double dist_x = this->manager.getPose().x() - next_block->getCenterPoint().getCoordinateX();
+//    double dist_y = this->manager.getPose().x() - next_block->getCenterPoint().getCoordinateY();
+//    double angle_now = this->manager.getPose().degrees();
+//
+//    this->angle_to_next = (atan(dist_x/dist_y)/ecl::pi)*180 - angle_now;
+//    this->distance_to_next = pow( pow(dist_x, 2.0)+pow(dist_y, 2.0), 0.5);
 ////////////////////////////////////////////////////////////////////////////////////////////
-*/
+
     //std::cout << "Next Position: " << (float)next_block->getCenterPoint().getCoordinateX()
     //    << " , " << (float)next_block->getCenterPoint().getCoordinateY() << std::endl;
     return next_block;
   }
+
 
 //Get angle will be turned from now to next block
   double getTurnAngle(Block* next_block){
@@ -240,7 +230,7 @@ public:
 // method for queue
 
   void pushPath( std::vector<Block *> list ){
-    while( !qu_path.empty() ) qu_path.pop();
+    while( !qu_path.empty() ) qu_path.pop();          // clear the queue
     for( int i=0; i<list.size(); i++) qu_path.push( list[i] );
     return;
   }
@@ -276,10 +266,23 @@ public:
 
   void setObstacleSize( Block *block, double move, Direction direct ){
     // if block has not obstacle object, then create obstacle. 
-  }
-
-  void getNearestAndPath( Block* start, std::vector<Block *>& path ){
-    
+    if( block->borders == NULL ) block->borders = new Borders;
+    switch( direct ){
+      case RIGHT:
+        block->borders->left = move;
+        break;
+      case UP:
+        block->borders->down = move;
+        break;
+      case LEFT:
+        block->borders->right = move;
+        break;
+      case DOWN:
+        block->borders->up = move;
+        break;
+      default:
+        break;
+    }
   }
 
 // functions for statemachine
@@ -292,8 +295,18 @@ public:
     return;
   }
 
-  bool findNext(){
+  bool setPathToNextBlock(){
+    std::vector<Block *> path = mapgraph.getPathToNearestUnknownBlock( this->current_block );
+    if( path.empty() ) return( false );
+    pushPath( path );
+    return( true );
+  }
 
+  bool setPathToTargetBlock( Block* target ){
+    std::vector<Block *> path = mapgraph.getPathToTargetBlock( this->current_block, target );
+    if( path.empty() ) return( false );
+    pushPath( path );
+    return( true );
   }
 
   bool isReached(){
@@ -328,15 +341,75 @@ public:
     manager.goStraight( -speed, runDistance );
   }
 
+/*
+  void recordIR( void ){
+    manager.getIRData();
+    for( unsigned int i = 0; i < 3; i++ ){
+    
+      kobuki::IRManager::Data ir_data = manager.getIRData();
+
+      if(  (ir_data[i].far_left     == 1)
+        || (ir_data[i].far_center   == 1)
+        || (ir_data[i].far_right    == 1)
+        || (ir_data[i].near_left    == 1)
+        || (ir_data[i].near_center  == 1)
+        || (ir_data[i].near_right   == 1) ){
+        
+        current_block->setIRMark(EXIST);
+        break;
+      }
+    }
+  }
+  
+  Block* searchIRBlock( void ){
+    for( unsigned int i = 0; i < this->block_list.size(); i++ ){
+      for( unsigned int j = 0; j < this->block_list[i].size(); j++ ){
+        if( this->block_list[i][j].getIRMark() == EXIST ){
+          return( &this->block_list[i][j] );
+        }
+      }
+    }
+    return( NULL );
+  }
+  
+  void clearIRMark( void ){
+    std::queue<Block *> q;
+    q.push( this->current_block );
+    while( !qu_path.empty() ){
+      Block* tmp = q.front();
+      q.pop();
+
+      if( tmp->getIRMark() == EXIST ){
+        int x = tmp->getTagX();
+        int y = tmp->getTagY();
+        int max_x = this->block_list.size()-1;
+        int max_y = this->block_list[x].size()-1;
+        if(( x > 0 )&&( this->block_list[x-1][y].getIRMark() == EXIST ))
+          q.push( &this->block_list[x-1][y] );
+        if(( x < max_x )&&( this->block_list[x+1][y].getIRMark() == EXIST ))
+          q.push( &this->block_list[x+1][y] );
+        if(( y > 0 )&&( this->block_list[x][y-1].getIRMark() == EXIST ))
+          q.push( &this->block_list[x][y-1] );
+        if(( y < max_y )&&( this->block_list[x][y+1].getIRMark() == EXIST ))
+          q.push( &this->block_list[x][y+1] );
+
+        tmp->setIRMark( NOT_EXIST );
+      }
+    }
+    return;
+  }
+*/
+
 private:
   Coordinate max;
   std::vector< std::vector<Block> > block_list;
   Block* current_block;
   Block* next_block;
-  //double angle_to_next;
-  //double distance_to_next;
   KobukiManager manager;
   std::queue<Block *> qu_path;
+  MapGraph mapgraph;
+  double angle_to_next;
+  double distance_to_next;
 
  };
 
