@@ -206,7 +206,7 @@ public:
     return &(this->manager);
   }
   
-    void checkWall(){
+  void checkWall(){
 
     int j = 0;
     while(this->block_list[0][j].getMark() != OBSTACLE){
@@ -218,52 +218,32 @@ public:
 
   void setWall(Block* wall_block){
 
-  	int idx_x = this->block_list.size();
-	int idx_y = this->block_list[0].size();
-	int tag_x = wall_block->getTagX();
-	int tag_y = wall_block->getTagX();
-
-	if(!(tag_x > 0 && tag_y == 0))
-	{
-		wall_block->setMark(WALL);
-
-		for(int i = tag_x -1; i<= tag_x + 1; i++)
-		{
-			if(i == -1) i = 0;
-			for(int j = tag_y -1; i<= tag_y + 1; j++)
-			{
-				if(j == -1) j = 0;
-				if(this->block_list[i][j].getMark() == OBSTACLE)
-				{
-					setWall(&this->block_list[i][j]);
-				}
-			}
-		}
-	} 
-	else 
-	{
-		wall_block->setMark(WALL);
-	}
-      return;
-  }
-
-  void showMap(){
     int idx_x = this->block_list.size();
     int idx_y = this->block_list[0].size();
-    std::cout << "=====Show now map construct !=====" << std::endl << std::endl;
-    for(int i = idx_y-1; i>-1; i--){
-      for(int j = 0; j<idx_x ; j++){
-        switch(block_list[j][i].getMark()){
-          case UNKNOWN: std::cout << "? ";	break;
+    int tag_x = wall_block->getTagX();
+    int tag_y = wall_block->getTagX();
 
-          case BLANK:	std::cout << "O ";	break;
+    if(!(tag_x > 0 && tag_y == 0))
+    {
+      wall_block->setMark(WALL);
 
-          case OBSTACLE:std::cout << "X ";	break;
+      for(int i = tag_x -1; i<= tag_x + 1; i++)
+      {
+        if(i == -1) i = 0;
+        for(int j = tag_y -1; i<= tag_y + 1; j++)
+        {
+          if(j == -1) j = 0;
+          if(this->block_list[i][j].getMark() == OBSTACLE)
+          {
+            setWall(&this->block_list[i][j]);
+          }
         }
       }
-      std::cout << std::endl;
+    } 
+    else 
+    {
+      wall_block->setMark(WALL);
     }
-    std::cout << "==================================" << std::endl << std::endl;
     return;
   }
 
@@ -286,6 +266,7 @@ public:
     std::cout << "==================================" << std::endl << std::endl;
     return;
   }
+
 
 // method for queue
 
@@ -401,7 +382,7 @@ public:
     manager.goStraight( -speed, runDistance );
   }
 
-/*
+
   void recordIR( void ){
     manager.getIRData();
     for( unsigned int i = 0; i < 3; i++ ){
@@ -458,7 +439,7 @@ public:
     }
     return;
   }
-*/
+
 
 private:
   Coordinate max;
