@@ -364,7 +364,7 @@ public:
     manager.changeDirection( speed, turnAngle );
   }
 
-  void RunToNext( double speed ){
+  void runToNext( double speed ){
     double runDistance = getNextDistance( this->next_block );
     manager.goStraight( speed, runDistance );
   }
@@ -438,6 +438,20 @@ public:
       }
     }
     return;
+  }
+
+ // get method for eventmanager
+
+  kobuki::SensorManager::Data getSensorData(){
+    return( manager.getSensorData() );
+  }
+
+  kobuki::IRManager::Data getIRData(){
+    return( manager.getIRData() );
+  }
+
+  KobukiManager::RunData getRunData(){
+    return( manager.getRunData() );
   }
 
 
