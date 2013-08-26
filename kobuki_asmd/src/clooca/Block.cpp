@@ -45,6 +45,8 @@ struct Borders
 	float right;
 	float up;
 	float down;
+
+  Borders(){ left = right = up = down = 0.0; }
 };
 
 /*****************************************************************************
@@ -131,13 +133,6 @@ public:
     return;
   }
 
-  struct Edges
-  {
-	Block* right_edge;
-	Block* left_edge;
-	Block* up_edge;
-	Block* down_edge;
-  } edges;
   struct Borders* borders;
 
 //Private member
