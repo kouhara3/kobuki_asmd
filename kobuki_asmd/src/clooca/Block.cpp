@@ -12,7 +12,7 @@
 /*****************************************************************************
 ** Define
 *****************************************************************************/
-#define DEFAULT_BLOCK_LENGTH 0.5
+#define DEFAULT_BLOCK_LENGTH 0.4
 #define DEFAULT_COORD_X 0
 #define DEFAULT_COORD_Y 0
 

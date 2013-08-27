@@ -10,7 +10,8 @@ public:
     char left_bumper;
     char center_bumper;
     char right_bumper;
-    Data(){ left_bumper=0; center_bumper=0; right_bumper=0;}
+    char charger;
+    Data(){ left_bumper=0; center_bumper=0; right_bumper=0; charger=0; }
   };
 
   void update( kobuki::CoreSensors::Data& new_data ){
@@ -35,11 +36,22 @@ public:
         data.right_bumper = 0;;
       }
     }
+
+    // check charger
+    uint8_t state = (new_data.charger & CoreSensors::Flags::BatteryStateMask);
+    if ( state == CoreSensors::Flags::Charging) {
+      data.charger = 1;
+    } else if ( state == CoreSensors::Flags::Charged ) {
+      data.charger = 1;
+    } else {
+      data.charger = 0;
+    }
+
     // update data
     last_data = new_data;
   }
 
-  Data getData(){ return( data ); }   // get row signal
+  Data getData(){ return( data ); }   // get signals
 
 private:
   kobuki::CoreSensors::Data last_data;
@@ -47,99 +59,6 @@ public:
   Data data;
 };
 
-/*
-class SimpleRun{
-public:
-  enum State{
-    STOP,
-    RUN,
-    TURN,
-  }
-
-  class Data{
-  public:
-    State state = STOP;
-    double dx, dth, dx_goal, dth_goal, stri_speed, dirct_speed;
-    
-    Data(){ dx=0.0; dth=0.0; dx_goal=0.0; dth_goal=0.0; stri_speed=0.0; dirct_speed=0.0; }
-  };
-
-  void goStright(double _stri_speed, double distance) {
-    stopRun();
-    data.stri_speed = _stri_speed;
-    data.dirct_speed = 0;
-    data.dx_goal = distance;
-    kobuki.setBaseControl( data.stri_speed, data.dirct_speed ); 
-    data.state = RUN;
-    return;
-  }
-
-  void changeDirction(double _dirct_speed, double angle) {
-    stopRun();
-    data.stri_speed = 0;
-    data.dirct_speed = _dirct_speed;
-    data.dth_goal = angle * ecl::pi /180;
-    kobuki.setBaseControl( data.stri_speed, data.dirct_speed ); // dirct_speed: to control the speed of dirction
-    dta.state = TURN;
-    return;
-  }
-
-  void stopRun() {
-    data.dx=0.0;
-    data.dth=0.0;
-    data.dx_goal=0.0;
-    data.dth_goal=0.0;
-    kobuki.setBaseControl(0.0, 0.0);
-    data.state = STOP;
-    return;
-  }
-
-  void update( Kobuki& kobuki ){
-    ecl::Pose2D<double> pose_update;
-    ecl::linear_algebra::Vector3d pose_update_rates;
-    kobuki.updateOdometry(pose_update, pose_update_rates);
-    pose *= pose_update;
-    dx += pose_update.x();
-    dth += pose_update.heading();
-
-    if( state == RUN ){
-      if (data.dx >= data.dx_goal) {
-        stopRun();
-      } else if (data.dx <= -data.dx_goal) {
-        stopRun();
-      }
-    }
-    else if( state == TURN ){
-      if (data.dth >= data.dth_goal) {
-        stopRun();
-      } else if (data.dth <= -data.dth_goal) {
-        stopRun();
-      }
-    }
-    return;
-  }
-
-  void changeRunSpeed( double new_spd ){
-    if( state != RUN ) return;
-    data.stri_speed = new_speed;
-    kobuki.setBaseControl( data.stri_speed, data.dirct_speed);
-    return;
-  }
-
-  void changeTurnSpeed( double new_spd ){
-    if( state != TURN ) return;
-    data.dirct_speed = new_speed;
-    kobuki.setBaseControl( data.stri_speed, data.dirct_speed);
-    return;
-  }
-
-  Data getData(){ return( data ); }
-
-private:
-  Data data;
-
-};
-*/
 
 class IRManager {
 public:
