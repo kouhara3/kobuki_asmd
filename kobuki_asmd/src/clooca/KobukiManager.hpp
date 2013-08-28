@@ -18,6 +18,11 @@
 #include "Utilities.cpp"
 #include "Sensors.hpp"
 
+#define stringfy(x) #x
+#define setState(x) {state=x;state_str=stringfy(x);}
+#define setVel(v,w) {vx=v;wz=w;}
+#define setStateVel(x,v,w) {setState(x);setVel(v,w);}
+
 /*****************************************************************************
 ** Classes
 *****************************************************************************/
@@ -94,6 +99,7 @@ public:
     ir_sensor.update( ir_data );
 
     runUpdate( pose_update );
+    rotated += pose_update.heading()/(2.0*M_PI);
 
     //kobuki::CoreSensors::Data data = kobuki.getCoreSensorData();
     //std::cout << "Encoders [" <<  data.left_encoder << "," << data.right_encoder << "]" << std::endl;
@@ -242,6 +248,226 @@ public:
     return;
   }
 
+  void docking( void ){
+    enum Station {
+      NEAR_LEFT=1,
+      NEAR_CENTER=2,
+      NEAR_RIGHT=4,
+      FAR_CENTER=8,
+      FAR_LEFT=16,
+      FAR_RIGHT=32,
+      NEAR = 7,
+      FAR = 56,
+    };
+    enum State {
+      IDLE,
+      LOST,
+      UNKNOWN,
+      INSIDE_FIELD,
+      AWAY,
+      SCAN,
+      SPIN,
+      SPIRAL,
+      FIND_STREAM,
+      GET_STREAM,
+      ALIGNED,
+      ALIGNED_FAR,
+      ALIGNED_NEAR,
+      BUMPED,
+      BUMPED_DOCK,
+      RUN,
+      STOP,
+      DOCKED_IN,
+      DONE,
+    };
+  
+    State state = IDLE;
+    double vx=0.0, wz=0.0;
+  
+    bool is_enabled=false, can_run=false;
+    std::string state_str, debug_str;
+    int bump_remainder=0;
+    int dock_stabilizer=0;
+    int dock_detector=0;
+    std::vector<std::vector<unsigned char> > past_signals;
+    bool rotate_reverse=false;
+  
+  while( state!=DONE ){
+      // update sensor data
+      kobuki::SensorManager::Data sensor = getSensorData();
+      kobuki::IRManager::Data ir = getIRData();
+    
+      unsigned char bumper=0;
+      if( sensor.left_bumper == 1 ) bumper += 0x04;
+      if( sensor.center_bumper == 1 ) bumper += 0x02;
+      if( sensor.right_bumper == 1 ) bumper += 0x01;
+    
+      unsigned char charger=0;
+      if( sensor.charger == 1 ) charger += 0x06;
+    
+      std::vector<unsigned char> signal(3,0);
+      for( int i=0; i<ir.size(); i++ ){
+        if( ir[i].far_left  ) signal[2-i] = FAR_LEFT;
+        if( ir[i].far_center) signal[2-i] = FAR_CENTER;
+        if( ir[i].far_right ) signal[2-i] = FAR_RIGHT;
+        if( ir[i].near_left  ) signal[2-i] = NEAR_LEFT;
+        if( ir[i].near_center) signal[2-i] = NEAR_CENTER;
+        if( ir[i].near_right ) signal[2-i] = NEAR_RIGHT;
+      }
+    
+      past_signals.push_back(signal);
+      unsigned int window = 20;
+      while (past_signals.size() > window)
+        past_signals.erase( past_signals.begin(), past_signals.begin() + past_signals.size() - window );
+    
+      std::vector<unsigned char> signal_filt(signal.size(), 0);
+      for ( unsigned int i=0; i<past_signals.size(); i++) {
+        if (signal_filt.size() != past_signals[i].size()) continue;
+        for (unsigned int j=0; j<signal_filt.size(); j++)
+          signal_filt[j] |= past_signals[i][j];
+      }
+    
+      // running
+      debug_str = "";
+      do {  // a kind of hack
+        if ( state==DONE ) setState(IDLE); // when this function is called after final state 'DONE'.
+        if ( state==DOCKED_IN ) {
+          if ( dock_stabilizer++ > 20 ) {
+            is_enabled = false;
+            can_run = false;
+            setStateVel(DONE, 0.0, 0.0); break;
+          }
+          setStateVel(DOCKED_IN, 0.0, 0.0); break;
+        }
+        if ( bump_remainder > 0 ) {
+          bump_remainder--;
+          if ( charger ) { setStateVel(DOCKED_IN, 0.0, 0.0); break; } // when bumper signal is received early than charger(dock) signal.
+          else {           setStateVel(BUMPED_DOCK, -0.01, 0.0); break; }
+        } else if (state == BUMPED) {
+          setState(IDLE); //should I remember and recall previous state?
+          debug_str="how dare!!";
+        }
+        if ( bumper || charger ) {
+          if( bumper && charger ) {
+            bump_remainder = 0;
+            setStateVel(BUMPED_DOCK, -0.01, 0.0); break;
+          }
+          if ( bumper ) {
+            bump_remainder = 50;
+            setStateVel(BUMPED, -0.05, 0.0); break;
+          }
+          if ( charger ) { // already docked in
+            dock_stabilizer = 0;
+            setStateVel(DOCKED_IN, 0.0, 0.0); break;
+          }
+        } else {
+          if ( state==IDLE ) {
+            dock_detector = 0;
+            setStateVel(SCAN, 0.00, 0.66); break;
+          }
+          if ( state==SCAN ) {
+            std::ostringstream oss;
+            oss << "rotated: " << std::fixed << std::setprecision(2) << std::setw(4) << rotated;
+            debug_str = oss.str();
+            if( std::abs(rotated) > 1.6 ) {
+              setStateVel(FIND_STREAM, 0.0, 0.0); break;
+            }
+            if (  signal_filt[1]&(FAR_LEFT  + NEAR_LEFT )) dock_detector--;
+            if (  signal_filt[1]&(FAR_RIGHT + NEAR_RIGHT)) dock_detector++;
+            if ( (signal_filt[1]&FAR_CENTER) || (signal_filt[1]&NEAR_CENTER) ) {
+              setStateVel(ALIGNED, 0.05, 0.00); break;
+            } else if ( signal_filt[1] ) {
+              if( rotate_reverse ){
+                setStateVel(SCAN, 0.00, -0.20);
+                break;
+              } else {
+                setStateVel(SCAN, 0.00, 0.20);
+                break;
+              }
+            } else {
+              if( rotate_reverse ){
+                setStateVel(SCAN, 0.00, -0.66);
+                break;
+              } else { 
+                setStateVel(SCAN, 0.00, 0.66);
+                break;
+              }
+            }
+    
+          } else if (state==ALIGNED || state==ALIGNED_FAR || state==ALIGNED_NEAR) {
+            if ( signal_filt[1] ) {
+              if ( signal_filt[1]&NEAR )
+              {
+                if ( ((signal_filt[1]&NEAR) == NEAR_CENTER) || ((signal_filt[1]&NEAR) == NEAR) ) { setStateVel(ALIGNED_NEAR, 0.05,  0.0); debug_str = "AlignedNearCenter"; break; }
+                if (   signal_filt[1]&NEAR_LEFT  ) {                                               setStateVel(ALIGNED_NEAR, 0.05,  0.1); debug_str = "AlignedNearLeft"  ; break; }
+                if (   signal_filt[1]&NEAR_RIGHT ) {                                               setStateVel(ALIGNED_NEAR, 0.05, -0.1); debug_str = "AlignedNearRight" ; break; }
+              }
+              if ( signal_filt[1]&FAR )
+              {
+                if ( ((signal_filt[1]&FAR) == FAR_CENTER) || ((signal_filt[1]&FAR) == FAR) ) { setStateVel(ALIGNED_FAR, 0.1,  0.0); debug_str = "AlignedFarCenter"; break; }
+                if (   signal_filt[1]&FAR_LEFT  ) {                                            setStateVel(ALIGNED_FAR, 0.1,  0.3); debug_str = "AlignedFarLeft"  ; break; }
+                if (   signal_filt[1]&FAR_RIGHT ) {                                            setStateVel(ALIGNED_FAR, 0.1, -0.3); debug_str = "AlignedFarRight" ; break; }
+              }
+              dock_detector = 0;
+              rotated = 0.0;
+              setStateVel(SCAN, 0.00, 0.66); break;
+            } else {
+              debug_str = "lost signals";
+              setStateVel(LOST, 0.00, 0.00); break;
+            }
+          } else if (state==FIND_STREAM) {
+            if (dock_detector > 0 ) { // robot is placed in right side of docking station
+              //turn  right , negative direction til get right signal from left sensor
+              if (signal_filt[2]&(FAR_RIGHT+NEAR_RIGHT)) {
+                setStateVel(GET_STREAM, 0.05, 0.0); break;
+              } else {
+                setStateVel(FIND_STREAM, 0.0, -0.33); break;
+              }
+            } else if (dock_detector < 0 ) { // robot is placed in left side of docking station
+              //turn left, positive direction till get left signal from right sensor
+              if (signal_filt[0]&(FAR_LEFT+NEAR_LEFT)) {
+                setStateVel(GET_STREAM, 0.05, 0.0); break;
+              } else {
+                setStateVel(FIND_STREAM, 0.0, 0.33); break;
+              }
+            }
+          } else if (state==GET_STREAM) {
+            if (dock_detector > 0) { //robot is placed in right side of docking station
+              if (signal_filt[2]&(FAR_LEFT+NEAR_LEFT)) {
+                dock_detector = 0;
+                rotated = 0.0;
+                rotate_reverse = false;
+                setStateVel(SCAN, 0.0, 0.20); break;
+              } else {
+                setStateVel(GET_STREAM, 0.05, 0.0); break;
+              }
+            } else if (dock_detector < 0) { // robot is placed in left side of docking station
+              if (signal_filt[0]&(FAR_RIGHT+NEAR_RIGHT)) {
+                dock_detector = 0;
+                rotated = 0.0;
+                rotate_reverse = true;
+                setStateVel(SCAN, 0.0, -0.20); break;
+              } else {
+                setStateVel(GET_STREAM, 0.05, 0.0); break;
+              }
+            }
+          } else {
+            dock_detector = 0;
+            rotated = 0.0;
+            setStateVel(SCAN, 0.00, 0.66); break;
+          }
+        }
+        setStateVel(UNKNOWN, 0.00, 0.00); break;
+      } while(0);
+    
+      rundata.stri_speed = vx;
+      rundata.dirct_speed = wz;
+      kobuki.setBaseControl( rundata.stri_speed, rundata.dirct_speed);
+    }
+  stopRun();
+
+  }
+
   RunData getRunData(){ return( rundata ); }
   kobuki::IRManager::Data getIRData(){ return( ir_sensor.getData() ); }
   kobuki::SensorManager::Data getSensorData(){ return( core_sensor.getData() ); }
@@ -253,6 +479,7 @@ private:
   int left_encoder_old;
   int right_encoder_old;
   ecl::Angle<double> heading;
+  double rotated;
 
   kobuki::Kobuki kobuki;
   ecl::Slot<> slot_stream_data;
