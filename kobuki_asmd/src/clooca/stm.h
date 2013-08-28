@@ -78,7 +78,8 @@ public:
   }
 
   void saveMap() {
-
+    map.showMe();
+    map.showIR();
     goFinish();
   }
 

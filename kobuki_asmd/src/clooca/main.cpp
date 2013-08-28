@@ -70,8 +70,8 @@ int main (int argc, char *argv[])
 
   signal(SIGINT, signalHandler);
 
-  std::cout << "Demo : Example of simple control loop." << std::endl;
-  std::cout << argv[0] << std::endl;
+  std::cout << "Team ASMD: Demo Start." << std::endl;
+  //std::cout << argv[0] << std::endl;
   //KobukiManager kobuki_manager;
 
   ecl::Sleep sleep(0.1);
