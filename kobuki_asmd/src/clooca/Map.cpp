@@ -485,20 +485,23 @@ public:
       q.pop();
 
       if( tmp->getIRMark() == EXIST ){
+        tmp->setIRMark( NOT_EXIST );
+
         int x = tmp->getTagX();
         int y = tmp->getTagY();
         int max_x = this->block_list.size()-1;
         int max_y = this->block_list[x].size()-1;
-        if(( x > 0 )&&( this->block_list[x-1][y].getIRMark() == EXIST ))
-          q.push( &this->block_list[x-1][y] );
-        if(( x < max_x )&&( this->block_list[x+1][y].getIRMark() == EXIST ))
-          q.push( &this->block_list[x+1][y] );
-        if(( y > 0 )&&( this->block_list[x][y-1].getIRMark() == EXIST ))
-          q.push( &this->block_list[x][y-1] );
-        if(( y < max_y )&&( this->block_list[x][y+1].getIRMark() == EXIST ))
-          q.push( &this->block_list[x][y+1] );
+        
+        for( int i = x-1; i <= x+1; i++ ){
+          if( (i < 0) || (i > max_x) ) continue;
 
-        tmp->setIRMark( NOT_EXIST );
+          for( int j = y-1; j <= y+1; j++ ){
+            if( (j < 0) || (j > max_y) ) continue;
+
+            if( this->block_list[i][j].getIRMark() == EXIST )
+              q.push( &this->block_list[i][j] );
+          }
+        }
       }
     }
     return;
@@ -598,6 +601,29 @@ public:
     return( manager.getRunData() );
   }
 
+  void showMe( void ){
+    for( unsigned int i = 0; i < this->block_list.size(); i++ ){
+      for( unsigned int j = 0; j < this->block_list[i].size(); j++ ){
+        if( this->block_list[i][j].getMark() == BLANK ) std::cout << " ";
+        else if( this->block_list[i][j].getMark() == UNKNOWN ) std::cout << "$";
+        else if( this->block_list[i][j].getMark() == OBSTACLE ) std::cout << "*";
+        else if( this->block_list[i][j].getMark() == WALL ) std::cout << "#";
+      }
+      std::cout << std::endl;
+    }
+    return;
+  }
+
+  void showIR( void ){
+    for( unsigned int i = 0; i < this->block_list.size(); i++ ){
+      for( unsigned int j = 0; j < this->block_list[i].size(); j++ ){
+        if( this->block_list[i][j].getIRMark() == NOT_EXIST ) std::cout << " ";
+        else if( this->block_list[i][j].getIRMark() == EXIST ) std::cout << "!";
+      }
+      std::cout << std::endl;
+    }
+    return;
+  }
 
 //private:
   Coordinate max;
