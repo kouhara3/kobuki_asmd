@@ -136,7 +136,11 @@
           {
             Borders* borders = Global_Block_List[i][j].borders;
 
-            glLineWidth(2.0f);
+            borders->left *= 100;
+            borders->up *= 100;
+            borders->down *= 100;
+            borders->right *= 100;
+
             glColor3f(0.5f, 0.0f, 0.0f);
             
             if(borders->left != 0.0f)
@@ -160,6 +164,13 @@
           if(Global_Block_List[i][j].getMark() == WALL)
           {
             Borders* borders = Global_Block_List[i][j].borders;
+
+            borders->left *= 100;
+            borders->up *= 100;
+            borders->down *= 100;
+            borders->right *= 100;
+
+            glLineWidth(2.0f);
             glColor3f(0.0f, 1.0f, 0.0f);
 
             if(borders->left != 0.0f)
