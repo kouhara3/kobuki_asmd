@@ -82,10 +82,11 @@ public:
 
   void setNextIRBlock() {
     if( map.setNextIRBlock() ) goNext();
-    else goFinish();
+    else std::cout<<"IRBlock not found"<<std::endl;
   }
 
   void docking() {
+    map.clearIRMark();
     map.docking();
     visit_dock++;
     goNext();
@@ -93,9 +94,7 @@ public:
 
   void checkDock() {
     if( visit_dock < 2 ){
-      map.clearIRMark();
-      map.goBackToCurrent( 0.3 );
-      goNext();
+      map.goBack( 0.3, 0.1 );
     }
     else goFinish();
   }
@@ -106,7 +105,7 @@ public:
   }
 
   void mapping() {
-    map.updateCurrent();
+    map.mappingBlank();
     map.recordIR();
     goNext();
   }
@@ -118,6 +117,7 @@ public:
 
   void checkNext() {
     std::cout<< "next: " << map.next_block->getTagX() << "," << map.next_block->getTagY() << std::endl;
+    map.updateCurrent();
     if( map.isReached() ){
       goFinish();
     }
@@ -136,8 +136,8 @@ public:
   }
 
   void initializeMap() {
-    map.checkWall();
-    map.searchObstacleBlocks();
+    //map.checkWall();
+    //map.searchObstacleBlocks();
     goNext();
   }
 

@@ -19,9 +19,9 @@
 /*****************************************************************************
 ** Define
 *****************************************************************************/
-#define MINIMUM_SIZE 0.5
+#define MINIMUM_SIZE 0.4
 #define KOBUKI_SIZE 0.35
-#define BLOCK_SIZE 50
+#define BLOCK_SIZE 40
 /*****************************************************************************
 ** Classes
 *****************************************************************************/
@@ -225,7 +225,7 @@ public:
   	int idx_x = this->block_list.size();
 	int idx_y = this->block_list[0].size();
 	int tag_x = wall_block->getTagX();
-	int tag_y = wall_block->getTagX();
+	int tag_y = wall_block->getTagY();
 
 	if(!(tag_x > 0 && tag_y == 0))
 	{
@@ -251,7 +251,7 @@ public:
       return;
   }
   
-  ////////////////////////////////////
+/*  ////////////////////////////////////
   void bmp_file(GLint WindowWidth, GLint WindowHeight) {
 
 	glReadBuffer(GL_FRONT);
@@ -381,7 +381,7 @@ public:
     glutMainLoop();
     return 0;
   }
-  
+*/  
   /////////////////////////////////////
 // method for queue
 
@@ -443,10 +443,14 @@ public:
 
 // functions for statemachine
 
+  void mappingBlank(){
+    current_block->setMark(BLANK);
+    return;
+  }
+
   void updateCurrent(){
     current_block->setHasKobuki(false);
     current_block = next_block;
-    current_block->setMark(BLANK);
     current_block->setHasKobuki(true);
     return;
   }
@@ -511,6 +515,9 @@ public:
     manager.goStraight( -speed, runDistance );
   }
 
+  void goBack( double speed, double distance ){
+    manager.goStraight( -speed, distance );
+  }
 
   void recordIR( void ){
     manager.getIRData();
@@ -518,10 +525,10 @@ public:
     
       kobuki::IRManager::Data ir_data = manager.getIRData();
 
-      if(  (ir_data[i].far_left     == 1)
+      if(/*  (ir_data[i].far_left     == 1)
         || (ir_data[i].far_center   == 1)
         || (ir_data[i].far_right    == 1)
-        || (ir_data[i].near_left    == 1)
+        ||*/ (ir_data[i].near_left    == 1)
         || (ir_data[i].near_center  == 1)
         || (ir_data[i].near_right   == 1) ){
         
