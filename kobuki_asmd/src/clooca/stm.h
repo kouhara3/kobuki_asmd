@@ -120,6 +120,7 @@ public:
 
   void checkNext() {
     std::cout<< "next: " << map.next_block->getTagX() << "," << map.next_block->getTagY() << std::endl;
+    map.showMe();
     map.updateCurrent();
     if( map.isReached() ){
       goFinish();

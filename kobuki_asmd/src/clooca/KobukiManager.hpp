@@ -354,7 +354,7 @@ public:
           }
           if ( bumper ) {
             bump_remainder = 50;
-            setStateVel(BUMPED, -0.05, 0.0); break;
+            setStateVel(BUMPED, -0.1, 0.0); break;
           }
           if ( charger ) { // already docked in
             dock_stabilizer = 0;
@@ -375,13 +375,13 @@ public:
             if (  signal_filt[1]&(FAR_LEFT  + NEAR_LEFT )) dock_detector--;
             if (  signal_filt[1]&(FAR_RIGHT + NEAR_RIGHT)) dock_detector++;
             if ( (signal_filt[1]&FAR_CENTER) || (signal_filt[1]&NEAR_CENTER) ) {
-              setStateVel(ALIGNED, 0.05, 0.00); break;
+              setStateVel(ALIGNED, 0.1, 0.00); break;
             } else if ( signal_filt[1] ) {
               if( rotate_reverse ){
-                setStateVel(SCAN, 0.00, -0.20);
+                setStateVel(SCAN, 0.00, -0.30);
                 break;
               } else {
-                setStateVel(SCAN, 0.00, 0.20);
+                setStateVel(SCAN, 0.00, 0.30);
                 break;
               }
             } else {
@@ -398,15 +398,15 @@ public:
             if ( signal_filt[1] ) {
               if ( signal_filt[1]&NEAR )
               {
-                if ( ((signal_filt[1]&NEAR) == NEAR_CENTER) || ((signal_filt[1]&NEAR) == NEAR) ) { setStateVel(ALIGNED_NEAR, 0.05,  0.0); debug_str = "AlignedNearCenter"; break; }
-                if (   signal_filt[1]&NEAR_LEFT  ) {                                               setStateVel(ALIGNED_NEAR, 0.05,  0.1); debug_str = "AlignedNearLeft"  ; break; }
-                if (   signal_filt[1]&NEAR_RIGHT ) {                                               setStateVel(ALIGNED_NEAR, 0.05, -0.1); debug_str = "AlignedNearRight" ; break; }
+                if ( ((signal_filt[1]&NEAR) == NEAR_CENTER) || ((signal_filt[1]&NEAR) == NEAR) ) { setStateVel(ALIGNED_NEAR, 0.1,  0.0); debug_str = "AlignedNearCenter"; break; }
+                if (   signal_filt[1]&NEAR_LEFT  ) {                                               setStateVel(ALIGNED_NEAR, 0.1,  0.15); debug_str = "AlignedNearLeft"  ; break; }
+                if (   signal_filt[1]&NEAR_RIGHT ) {                                               setStateVel(ALIGNED_NEAR, 0.1, -0.15); debug_str = "AlignedNearRight" ; break; }
               }
               if ( signal_filt[1]&FAR )
               {
-                if ( ((signal_filt[1]&FAR) == FAR_CENTER) || ((signal_filt[1]&FAR) == FAR) ) { setStateVel(ALIGNED_FAR, 0.1,  0.0); debug_str = "AlignedFarCenter"; break; }
-                if (   signal_filt[1]&FAR_LEFT  ) {                                            setStateVel(ALIGNED_FAR, 0.1,  0.3); debug_str = "AlignedFarLeft"  ; break; }
-                if (   signal_filt[1]&FAR_RIGHT ) {                                            setStateVel(ALIGNED_FAR, 0.1, -0.3); debug_str = "AlignedFarRight" ; break; }
+                if ( ((signal_filt[1]&FAR) == FAR_CENTER) || ((signal_filt[1]&FAR) == FAR) ) { setStateVel(ALIGNED_FAR, 0.2,  0.0); debug_str = "AlignedFarCenter"; break; }
+                if (   signal_filt[1]&FAR_LEFT  ) {                                            setStateVel(ALIGNED_FAR, 0.2,  0.6); debug_str = "AlignedFarLeft"  ; break; }
+                if (   signal_filt[1]&FAR_RIGHT ) {                                            setStateVel(ALIGNED_FAR, 0.2, -0.6); debug_str = "AlignedFarRight" ; break; }
               }
               dock_detector = 0;
               rotated = 0.0;
@@ -419,14 +419,14 @@ public:
             if (dock_detector > 0 ) { // robot is placed in right side of docking station
               //turn  right , negative direction til get right signal from left sensor
               if (signal_filt[2]&(FAR_RIGHT+NEAR_RIGHT)) {
-                setStateVel(GET_STREAM, 0.05, 0.0); break;
+                setStateVel(GET_STREAM, 0.1, 0.0); break;
               } else {
                 setStateVel(FIND_STREAM, 0.0, -0.33); break;
               }
             } else if (dock_detector < 0 ) { // robot is placed in left side of docking station
               //turn left, positive direction till get left signal from right sensor
               if (signal_filt[0]&(FAR_LEFT+NEAR_LEFT)) {
-                setStateVel(GET_STREAM, 0.05, 0.0); break;
+                setStateVel(GET_STREAM, 0.1, 0.0); break;
               } else {
                 setStateVel(FIND_STREAM, 0.0, 0.33); break;
               }
@@ -437,18 +437,18 @@ public:
                 dock_detector = 0;
                 rotated = 0.0;
                 rotate_reverse = false;
-                setStateVel(SCAN, 0.0, 0.20); break;
+                setStateVel(SCAN, 0.0, 0.30); break;
               } else {
-                setStateVel(GET_STREAM, 0.05, 0.0); break;
+                setStateVel(GET_STREAM, 0.1, 0.0); break;
               }
             } else if (dock_detector < 0) { // robot is placed in left side of docking station
               if (signal_filt[0]&(FAR_RIGHT+NEAR_RIGHT)) {
                 dock_detector = 0;
                 rotated = 0.0;
                 rotate_reverse = true;
-                setStateVel(SCAN, 0.0, -0.20); break;
+                setStateVel(SCAN, 0.0, -0.30); break;
               } else {
-                setStateVel(GET_STREAM, 0.05, 0.0); break;
+                setStateVel(GET_STREAM, 0.1, 0.0); break;
               }
             }
           } else {
