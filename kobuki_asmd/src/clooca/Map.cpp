@@ -301,8 +301,8 @@ public:
 
   double getMovement( Block *block ){
     double distance = getNextDistance( block );
-    double border = ( block->getSideLength() / 2 * 3 ) - ( KOBUKI_SIZE / 2 ) - distance;
-    if( border < 0 ) border = 0;
+    double border = block->getSideLength() - distance;
+    if( border < 0.0 ) border = 0.0;
     return border;
   }
 
