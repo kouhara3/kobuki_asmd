@@ -164,30 +164,24 @@
             glLineWidth(3.0f);
             glColor3f(1.0f, 0.0f, 0.0f);
 
+            glBegin(GL_LINES); 
             if(borders->left != 0.0f)
-            {
-              glBegin(GL_LINES); 
-	        glVertex2f(pointX + borders->left*100/width, pointY);  glVertex2f(pointX + borders->left*100/width, pointY + block_height); 
-              glEnd();
+            {              
+	        glVertex2f(pointX + borders->left/width, pointY);  glVertex2f(pointX + borders->left/width, pointY + block_height); 
             }
             else if(borders->right != 0.0f) 
             {
-              glBegin(GL_LINES); 
-	        glVertex2f(pointX + (BLOCK_SIZE-borders->right*100)/width, pointY);  glVertex2f(pointX + (BLOCK_SIZE-borders->right*100)/width, pointY + block_height); 
-              glEnd();
+	        glVertex2f(pointX + (BLOCK_SIZE-borders->right)/width, pointY);  glVertex2f(pointX + (BLOCK_SIZE-borders->right)/width, pointY + block_height); 
             }
             if(borders->up != 0.0f)
             {
-              glBegin(GL_LINES); 
-	        glVertex2f(pointX, pointY + (BLOCK_SIZE-borders->up*100)/height);  glVertex2f(pointX + block_width, pointY+ (BLOCK_SIZE-borders->up*100)/height); 
-              glEnd();
+	        glVertex2f(pointX, pointY + (BLOCK_SIZE-borders->up)/height);  glVertex2f(pointX + block_width, pointY+ (BLOCK_SIZE-borders->up)/height); 
             }
             else if(borders->down != 0.0f) 
             {
-              glBegin(GL_LINES); 
-	        glVertex2f(pointX, pointY + borders->down*100/height);  glVertex2f(pointX + block_width, pointY + borders->down*100/height); 
-              glEnd();
+	        glVertex2f(pointX, pointY + borders->down/height);  glVertex2f(pointX + block_width, pointY + borders->down/height); 
             }
+            glEnd();
           }
 
       }
