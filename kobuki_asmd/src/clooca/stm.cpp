@@ -81,7 +81,7 @@ initializeMap();
     
   case KobukiStateMachine_STATE_saveMap: /* saveMap */
     // 地図の描画，保存
-saveMap();
+  saveMap();
     break;
     
   case KobukiStateMachine_STATE_setNextObstacle: /* setNextObstacle */
@@ -162,7 +162,7 @@ checkDock();
     break;
     
   case KobukiStateMachine_STATE_stop: /* stop */
-    
+stop();
     break;
     
   }

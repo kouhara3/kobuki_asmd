@@ -1,10 +1,10 @@
-#include "b.cpp"
+#pragma once
+
 #include <stdio.h>
 #include <stdlib.h>
-#include <iostream>
-#include <math.h>
 #include <vector>
 #include <GL/glut.h>
+#include "Map.cpp"
 
 #define BLOCK_SIZE 40
 #define BMP_Header_Length 54  
@@ -34,14 +34,14 @@
 	pPixelData = (GLubyte*)malloc(PixelDataLength); 
 	if( pPixelData == 0 ) 
 		exit(0); 
-	pDummyFile = fopen("/home/winter/dummy.bmp", "rb+");
-	if( pDummyFile == 0 ) 
+	pDummyFile = fopen("/home/ishida/dummy.bmp", "rb+");
+  if( pDummyFile == 0 ) 
 	{  
            printf("Can't open dummy.bmp\n");
    	   exit(0); 
 	}
-	pWritingFile = fopen("/home/winter/Map.bmp", "wb+"); 
-	if( pWritingFile == 0 )
+	pWritingFile = fopen("/home/ishida/Map.bmp", "wb+");
+  if( pWritingFile == 0 )
 	{  
            printf("Can't open Map.bmp\n");
    	   exit(0); 
@@ -75,8 +75,8 @@
   void save()
   {
 
-    float width = Global_Max.getCoordinateX()*100/2;
-    float height = Global_Max.getCoordinateY()*100/2;
+    float width = Global_Max.getCoordinateX()*100;
+    float height = Global_Max.getCoordinateY()*100;
     bmp_file((GLint)width, (GLint)height);
     
     return;
@@ -132,7 +132,7 @@
           
           glDisable(GL_LINE_STIPPLE);
 
-          if(Global_Block_List[i][j].getMark() == OBSTACLE )
+          if(Global_Block_List[i][j].getMark() == OBSTACLE || Global_Block_List[i][j].getMark() == WALL)
           {
             Borders* borders = Global_Block_List[i][j].borders;
             glColor3f(1.0f, 0.0f, 0.0f);
@@ -209,7 +209,18 @@
     glutMainLoop();
     return 0;
   }
-  
+
+  void outputBlockList( Map& map ){
+    Global_Block_List = map.getBlockList();
+    return;
+  }
+
+  void outputMax( Map& map ){
+    Global_Max = map.getMax();
+    return;
+  }
+
+/*
 int main(int argc, char * argv[])
 {
   for (int i = 0; i < 5; i++)
@@ -231,3 +242,4 @@ int main(int argc, char * argv[])
 
   return showMap(argc, argv);
 }
+*/

@@ -7,6 +7,8 @@
 /*****************************************************************************
 ** Includes
 *****************************************************************************/
+#include <stdio.h>
+#include <stdlib.h>
 #include <iostream>
 #include <math.h>
 #include <vector>
@@ -21,7 +23,7 @@
 *****************************************************************************/
 #define MINIMUM_SIZE 0.4
 #define KOBUKI_SIZE 0.35
-#define BLOCK_SIZE 40
+
 /*****************************************************************************
 ** Classes
 *****************************************************************************/
@@ -217,6 +219,7 @@ public:
         j++;
     }
 
+    std::cout << "first obstacle: 0," << j << std::endl;
     setWall(&this->block_list[0][j]);
   }
 
@@ -230,11 +233,12 @@ public:
 	if(!(tag_x > 0 && tag_y == 0))
 	{
 		wall_block->setMark(WALL);
+    std::cout << "checked: " << tag_x << "," << tag_y << std::endl;
 
 		for(int i = tag_x -1; i<= tag_x + 1; i++)
 		{
 			if(i == -1) i = 0;
-			for(int j = tag_y -1; i<= tag_y + 1; j++)
+			for(int j = tag_y -1; j<= tag_y + 1; j++)
 			{
 				if(j == -1) j = 0;
 				if(this->block_list[i][j].getMark() == OBSTACLE)
@@ -247,141 +251,31 @@ public:
 	else 
 	{
 		wall_block->setMark(WALL);
+    std::cout << "last: " << tag_x << "," << tag_y << std::endl;
 	}
+  std::cout << "finish" << std::endl;
       return;
   }
   
 /*  ////////////////////////////////////
-  void bmp_file(GLint WindowWidth, GLint WindowHeight) {
-
-	glReadBuffer(GL_FRONT);
-
-	FILE* pDummyFile;
-	FILE* pWritingFile;
-	GLubyte* pPixelData;
-	GLubyte BMP_Header[BMP_Header_Length]; 
-	GLint i, j; 
-	GLint PixelDataLength; 
-	
-	// 计算像素数据的实际长度
-	i = WindowWidth * 3;		// 得到每一行的像素数据长度 
-	while( i%4 != 0 )		// 补充数据，直到i是的倍数 
-		++i; 
-	PixelDataLength = i * WindowHeight; 
-	
-	// 分配内存和打开文件 
-	pPixelData = (GLubyte*)malloc(PixelDataLength); 
-	if( pPixelData == 0 ) 
-		exit(0); 
-	fopen_s(&pDummyFile,"dummy.bmp", "rb+");
-	if( pDummyFile == 0 ) 
-		exit(0); 
-	fopen_s(&pWritingFile,"Map.bmp", "wb+"); 
-	if( pWritingFile == 0 )
-		exit(0);
-	
-	// 读取像素
-	glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
-	glReadPixels(0, 0, WindowWidth, WindowHeight, GL_RGB, GL_UNSIGNED_BYTE, pPixelData); 
-	// 把dummy.bmp的文件头复制为新文件的文件头
-	fread(BMP_Header, sizeof(BMP_Header), 1, pDummyFile);
-	fwrite(BMP_Header, sizeof(BMP_Header), 1, pWritingFile);
-	fseek(pWritingFile, 0x0012, SEEK_SET);
-	
-	i = WindowWidth; 
-	j = WindowHeight;
-	fwrite(&i, sizeof(i), 1, pWritingFile);
-	fwrite(&j, sizeof(j), 1, pWritingFile);
-	
-	// 写入像素数据 
-	fseek(pWritingFile, 0, SEEK_END); 
-	fwrite(pPixelData, PixelDataLength, 1, pWritingFile); 
-	
-	// 释放内存和关闭文件 
-	fclose(pDummyFile);
-	fclose(pWritingFile);
-	free(pPixelData);
-	
-	printf("Picture was saved as grap.bmp\n");
+  void outputBlockList(){
+    Global_Block_List = this->block_list;
+    return;
   }
 
-  static void key_callback(unsigned char key, int x, int y)
-  {
-        switch(key) {
-		case 'q':
-			exit(0);
-			break;
-		case 's':
-                        float width = this->max.getCoordinateX()*100;
-       			float height = this->max.getCoordinateY()*100;
-			bmp_file((GLint)width, (GLint)height);		
-			break;
-		default:
-			break;
-	}
-	glutPostRedisplay(); 
+  void outputMax(){
+    Global_Max = this->max;
+    return;
+  }
+*/
+  std::vector< std::vector<Block> > getBlockList(){
+    return( this->block_list );
   }
 
-  void makeMap(){
-
-    float width = this->max.getCoordinateX()*100/2;
-    float height = this->max.getCoordinateY()*100/2;
-    float block_width =  BLOCK_SIZE/width;
-    float block_height =  BLOCK_SIZE/height;
-    int idx_x = this->block_list.size();
-    int idx_y = this->block_list[0].size();
-    
-    glClear(GL_COLOR_BUFFER_BIT);
-    glClearColor(1.0f, 1.0f ,1.0f, 0.0f);
-
-    glColor3f(0.0f, 1.0f, 1.0f);
-    for(int i = 0; i<idx_x; i++){
-      float pointX = -1.0f + i * block_width;
-      for(int j = 0; j<idx_y ; j++){ 
-          float pointY = -1.0f + j*block_height;
-          glEnable(GL_LINE_STIPPLE);
-          glColor3f(0.0f, 0.0f, 0.0f);
-    	  glLineStipple(1, 0xAAAA);
-          
-	  glBegin(GL_POLYGON); 
-	    glVertex2f(pointX, pointY); 
-            glVertex2f(pointX + block_width, pointY); 
-            glVertex2f(pointX + block_width, pointY + block_height); 
-            glVertex2f(pointX, pointY + block_height); 
-          glEnd();
-          
-          glDisable(GL_LINE_STIPPLE);
-
-          if(this->block_list[i][j].getMark() == OBSTACLE )
-          {
-            
-          }
-          if(this->block_list[i][j].getMark() == WALL)
-          {
-            
-          }
-        }
-      }
-    }
+  Coordinate getMax(){
+    return( this->max );
   }
 
-  int showMap(int argc, char * argv[]){
-    int width = this->max.getCoordinateX()*100;
-    int height = this->max.getCoordinateY()*100;
-
-    glutInit(&argc, argv);
-    glutInitDisplayMode(GLUT_RGB|GLUT_DOUBLE);
-    glutInitWindowSize(weight, height);
-    glutInitWindowPosition(100, 100);
-    glutCreateWindow("Mapping!");
-
-    glutDisplayFunc(&makeMap);
-    glutKeyboardFunc(&key_callback);
-
-    glutMainLoop();
-    return 0;
-  }
-*/  
   /////////////////////////////////////
 // method for queue
 
@@ -406,9 +300,10 @@ public:
 // private functions
 
   double getMovement( Block *block ){
-    double move = getNextDistance( block );
-    move += ( KOBUKI_SIZE / 2 ) - ( block->getSideLength() / 2 );
-    return move;
+    double distance = getNextDistance( block );
+    double border = ( block->getSideLength() / 2 * 3 ) - ( KOBUKI_SIZE / 2 ) - distance;
+    if( border < 0 ) border = 0;
+    return border;
   }
 
   Direction getDirection(){
@@ -426,15 +321,19 @@ public:
     switch( direct ){
       case RIGHT:
         block->borders->left = move;
+        std::cout << "left: " << move << std::endl;
         break;
       case UP:
         block->borders->down = move;
+        std::cout << "down: " << move << std::endl;
         break;
       case LEFT:
         block->borders->right = move;
+        std::cout << "right: " << move << std::endl;
         break;
       case DOWN:
         block->borders->up = move;
+        std::cout << "up: " << move << std::endl;
         break;
       default:
         break;

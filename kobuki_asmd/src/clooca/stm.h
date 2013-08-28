@@ -31,6 +31,7 @@ private:
   static const int matrix[];
 public:
   /* attributes */
+  bool endflg;
 
   int visit_dock;
 
@@ -49,6 +50,7 @@ public:
   void action(int state);
 
   void init(){
+    endflg = false;
     map.resize(5.2, 8.0);
     visit_dock = 0;
   }
@@ -136,9 +138,13 @@ public:
   }
 
   void initializeMap() {
-    //map.checkWall();
+    map.checkWall();
     //map.searchObstacleBlocks();
     goNext();
+  }
+
+  void stop(){
+    endflg = true;
   }
 
   void goNext() {
