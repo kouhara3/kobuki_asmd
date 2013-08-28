@@ -1,10 +1,7 @@
-#include "b.cpp"
 #include <stdio.h>
 #include <stdlib.h>
-#include <iostream>
-#include <math.h>
-#include <vector>
 #include <GL/glut.h>
+#include "Block.cpp"
 
 #define BLOCK_SIZE 40
 #define BMP_Header_Length 54  
@@ -209,7 +206,7 @@
     glutMainLoop();
     return 0;
   }
-  
+/*
 int main(int argc, char * argv[])
 {
   for (int i = 0; i < 5; i++)
@@ -231,3 +228,4 @@ int main(int argc, char * argv[])
 
   return showMap(argc, argv);
 }
+*/
