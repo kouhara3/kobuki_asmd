@@ -132,7 +132,7 @@
           if(Global_Block_List[i][j].getMark() == OBSTACLE )
           {
             Borders* borders = Global_Block_List[i][j].borders;
-            glColor3f(1.0f, 0.0f, 0.0f);
+            glColor3f(0.5f, 0.0f, 0.0f);
             //glRectf(pointX + borders->left/width, pointY + borders->down/height, pointX + (BLOCK_SIZE-borders->right)/width, pointY + (BLOCK_SIZE-borders->up)/height);
             if(borders->left != 0.0f)
             {
