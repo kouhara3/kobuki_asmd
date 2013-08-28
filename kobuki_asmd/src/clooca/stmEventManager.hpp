@@ -22,17 +22,19 @@ public:
     RIGHT_NEAR_IR_FOUND,
     RIGHT_NEAR_IR_MISSED,
 */
-    BUMPER_PRESSED = 0,
+    BUMPER_PRESSED = 5,
     BUMPER_RELEASED = -1,
     IR_FOUND = -1,
     IR_MISSED = -1,
     RUN_REACHED = 4,
     TURN_REACHED = 3,
+    BUTTON_PUSHED = 0
   };
 
   STMEventManager(){
     last_bumper_signal = 0x00;
     last_ir_signal = 0x00;
+    last_button_signal = 0x00;
     last_run_state = KobukiManager::STOP;
   }
 
@@ -56,6 +58,14 @@ public:
       else stm.sendEvent( BUMPER_RELEASED );
     }
     last_bumper_signal = signal;  // update signal
+
+    /* check button */
+    signal = 0x00;    // check signal
+    if( new_sensor.button ) signal = 0x01;
+    if( signal ^ last_button_signal ){
+      if( signal ) stm.sendEvent( BUTTON_PUSHED );
+    }
+    last_button_signal = signal;  // update signal 
 
     /* check IR */
     signal = 0x00;    // check signal
@@ -96,6 +106,7 @@ private:
 
   unsigned char last_bumper_signal;
   unsigned char last_ir_signal;
+  unsigned char last_button_signal;
   KobukiManager::State last_run_state;
 
 };
