@@ -211,40 +211,67 @@ public:
     //std::cout << rundata.stri_speed << "," << rundata.dirct_speed << std::endl; 
 
     if( rundata.state == RUN ){
-      if (rundata.dx >= rundata.dx_goal) {
+      double abs_dx;
+      if( rundata.dx >= 0 ) abs_dx = rundata.dx;
+      else abs_dx = -rundata.dx;
+
+      if( abs_dx >= rundata.dx_goal ){
         //std::cout << "Target Distance: " << rundata.dx_goal << std::endl;
         //std::cout << "Run Distance: " << rundata.dx << std::endl;
         stopRun();
-      } else if (rundata.dx <= -rundata.dx_goal) {
-        stopRun();
+        return;
       }
+
+      double spd_down_erea = rundata.dx_goal / 4;
+      double default_speed = 0.05;
+
+      double acc;
+      if( abs_dx < spd_down_erea ) acc = abs_dx / spd_down_erea;
+      else if( (rundata.dx_goal - abs_dx) < spd_down_erea ) acc = (rundata.dx_goal - abs_dx) / spd_down_erea;
+      else return;
+
+      double new_spd;
+      if( rundata.stri_speed > 0 ) new_spd = default_speed + (rundata.stri_speed - default_speed ) * acc;
+      else new_spd = -(default_speed + (-rundata.stri_speed - default_speed ) * acc);
+      changeRunSpeed( new_spd );
+
     }
     else if( rundata.state == TURN ){
-      if (rundata.dth >= rundata.dth_goal) {
-        //std::cout << "Target Angle: " << rundata.dth_goal * 180 / ecl::pi << std::endl;
-        //std::cout << "Turned Angle: " << rundata.dth * 180 / ecl::pi << std::endl;
-        stopRun();
+      double abs_dth;
+      if( rundata.dth >= 0 ) abs_dth = rundata.dth;
+      else  abs_dth = -rundata.dth;
 
-      } else if (rundata.dth <= -rundata.dth_goal) {
+      if (abs_dth >= rundata.dth_goal) {
         //std::cout << "Target Angle: " << rundata.dth_goal * 180 / ecl::pi << std::endl;
         //std::cout << "Turned Angle: " << rundata.dth * 180 / ecl::pi << std::endl;
         stopRun();
+        return;
       }
+
+      double spd_down_erea = rundata.dth_goal / 4;
+      double default_speed = 0.2;
+
+      double acc;
+      if( abs_dth < spd_down_erea ) acc = abs_dth / spd_down_erea;
+      else if( (rundata.dth_goal - abs_dth) < spd_down_erea ) acc = (rundata.dth_goal - abs_dth) / spd_down_erea;
+      else return;
+
+      double new_spd;
+      if( rundata.dirct_speed > 0 ) new_spd = default_speed + (rundata.dirct_speed - default_speed ) * acc;
+      else new_spd = -(default_speed + (-rundata.dirct_speed - default_speed ) * acc);
+      changeTurnSpeed( new_spd );
+
     }
     return;
   }
 
   void changeRunSpeed( double new_speed ){
-    if( rundata.state != RUN ) return;
-    rundata.stri_speed = new_speed;
-    kobuki.setBaseControl( rundata.stri_speed, rundata.dirct_speed);
+    kobuki.setBaseControl( new_speed, rundata.dirct_speed);
     return;
   }
 
   void changeTurnSpeed( double new_speed ){
-    if( rundata.state != TURN ) return;
-    rundata.dirct_speed = new_speed;
-    kobuki.setBaseControl( rundata.stri_speed, rundata.dirct_speed);
+    kobuki.setBaseControl( rundata.stri_speed, new_speed);
     return;
   }
 
