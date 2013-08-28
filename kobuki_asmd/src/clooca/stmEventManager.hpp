@@ -38,9 +38,9 @@ public:
 
   void checkEvent( KobukiStateMachine& stm ){
 
-    kobuki::SensorManager::Data new_sensor = stm.kobukimanager->getSensorData();
-    kobuki::IRManager::Data new_ir = stm.kobukimanager->getIRData();
-    KobukiManager::RunData new_rundata = stm.kobukimanager->getRunData();
+    kobuki::SensorManager::Data new_sensor = stm.map.getSensorData();
+    kobuki::IRManager::Data new_ir = stm.map.getIRData();
+    KobukiManager::RunData new_rundata = stm.map.getRunData();
 
     int i;
     unsigned char signal;

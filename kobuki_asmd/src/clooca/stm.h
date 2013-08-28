@@ -1,28 +1,10 @@
+#pragma once
 
 #ifndef D_MEXU_H_
 #define D_MEXU_H_
 
 #include "main.h"
 #include "MEXU.h"
-
-
-/* State ID Definitions */
-#define KobukiStateMachine_STATE_IGNORE -1
-  
-
-#define KobukiStateMachine_STATE_start 0
-
-#define KobukiStateMachine_STATE_decideNext 1
-
-#define KobukiStateMachine_STATE_changeDrection 2
-
-#define KobukiStateMachine_STATE_running 3
-
-#define KobukiStateMachine_STATE_mapping 4
-
-#define KobukiStateMachine_STATE_foundObstacle 5
-
-#define KobukiStateMachine_STATE_stop 6
 
 
 /* Event ID Definitions */
@@ -37,7 +19,7 @@
 
 #define KobukiStateMachine_EVENT_RUN_REACHED 4
 
-
+#define KobukiStateMachine_EVENT_IGNORE 5
 
 /*====================================================
  * KobukiStateMachine class
@@ -49,48 +31,177 @@ private:
   static const int matrix[];
 public:
   /* attributes */
-  int current_state;
+
+  int visit_dock;
 
   Map map;
-
-  KobukiManager* kobukimanager;
-
-  Block* next_block;
-
-  double turnAngle;
-
-  double runDistance;
-
-  //std::vector<std::string> statename;
-  //std::vector<std::string> eventname;
 
   /* methods */                          
   KobukiStateMachine() : StateMachine(){
       eventManager.addSTM(this);
       current_state = 0;
 
-    map.resize(2.5, 2.5);
-	  kobukimanager = map.getKobukiManager();
-	  next_block = map.getCurrentBlock();
-	  turnAngle = 0;
-	  runDistance = 0;
-  //statename.resize(7);
-  //eventname.resize(5);
-  //statename = { "start", "decideNext", "changeDirection", "running", "mapping", "foundObstacle", "stop" };
-  //eventname = { "BumperPressed", "Next", "Finish", "TurnReached", "RunReached" };
+      init();
   }
 
   ~KobukiStateMachine() {}
   int execute(MEXUEvent *event);
+  void action(int state);
+
+  void init(){
+    map.resize(5.2, 8.0);
+    visit_dock = 0;
+  }
+
+  void setNextObstacle() {
+    if( map.setNextUncheckedObstacle() ) goNext();
+    else goFinish();
+  }
+
+  void setNextSide() {
+    if( map.setNextSide() ) goNext();
+    else goFinish();
+  }
+
+  void turnToObstacle() {
+    map.turnToObstacle( 1.0 );
+  }
+
+  void runToObstacle() {
+    map.runToObstacle( 0.3 );
+  }
+
+  void measureBorder() {
+    map.measureBorder();
+  }
+
+  void saveMap() {
+
+    goFinish();
+  }
+
+  void setNextIRBlock() {
+    if( map.setNextIRBlock() ) goNext();
+    else goFinish();
+  }
+
+  void docking() {
+    map.docking();
+    visit_dock++;
+    goNext();
+  }
+
+  void checkDock() {
+    if( visit_dock < 2 ){
+      map.clearIRMark();
+      map.goBackToCurrent( 0.3 );
+      goNext();
+    }
+    else goFinish();
+  }
+
+  void foundObstacle() {
+    map.foundObstacle();
+    map.goBackToCurrent(0.3);
+  }
+
+  void mapping() {
+    map.updateCurrent();
+    map.recordIR();
+    goNext();
+  }
+
+  void setNextBlock() {
+    if( map.setPathToNextBlock() ) goNext();
+    else goFinish();
+  }
+
+  void checkNext() {
+    std::cout<< "next: " << map.next_block->getTagX() << "," << map.next_block->getTagY() << std::endl;
+    if( map.isReached() ){
+      goFinish();
+    }
+    else {
+      map.setNext();
+      goNext();
+    }
+  }
+
+  void turnToNext() {
+    map.turnToNext( 1.0 );
+  }
+
+  void runToNext() {
+    map.runToNext( 0.3 );
+  }
+
+  void initializeMap() {
+    map.checkWall();
+    map.searchObstacleBlocks();
+    goNext();
+  }
 
   void goNext() {
-  this->sendEvent( KobukiStateMachine_EVENT_NEXT );
+    this->sendEvent( KobukiStateMachine_EVENT_NEXT );
   }
 
   void goFinish() {
-  this->sendEvent( KobukiStateMachine_EVENT_FINISH );
+    this->sendEvent( KobukiStateMachine_EVENT_FINISH );
   }
 
 };
+/* State ID Definitions */
+#define KobukiStateMachine_STATE_IGNORE -1
+  
+
+#define KobukiStateMachine_STATE_start 0
+
+#define KobukiStateMachine_STATE_mapping 1
+
+#define KobukiStateMachine_STATE_setNextBlock 2
+
+#define KobukiStateMachine_STATE_checkNext_1 3
+
+#define KobukiStateMachine_STATE_turnToNext_1 4
+
+#define KobukiStateMachine_STATE_runToNext_1 5
+
+#define KobukiStateMachine_STATE_foundObstacle 6
+
+#define KobukiStateMachine_STATE_initializeMap 7
+
+#define KobukiStateMachine_STATE_saveMap 8
+
+#define KobukiStateMachine_STATE_setNextObstacle 9
+
+#define KobukiStateMachine_STATE_setNextSide 10
+
+#define KobukiStateMachine_STATE_checkNext_2 11
+
+#define KobukiStateMachine_STATE_turnToNext_2 12
+
+#define KobukiStateMachine_STATE_runToNext_2 13
+
+#define KobukiStateMachine_STATE_measureBorder 14
+
+#define KobukiStateMachine_STATE_turnToObstacle 15
+
+#define KobukiStateMachine_STATE_runToObstacle 16
+
+#define KobukiStateMachine_STATE_setNextIRBlock 17
+
+#define KobukiStateMachine_STATE_checkNext_3 18
+
+#define KobukiStateMachine_STATE_turnToNext_3 19
+
+#define KobukiStateMachine_STATE_runToNext_3 20
+
+#define KobukiStateMachine_STATE_docking 21
+
+#define KobukiStateMachine_STATE_checkDock 22
+
+#define KobukiStateMachine_STATE_stop 23
+
+
 
 #endif /* D_MEXU_H_ */

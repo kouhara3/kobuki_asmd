@@ -86,6 +86,7 @@ public:
       }
 
       this->current_block = (Block*) &block_list[0][0];
+      this->next_block = this->current_block;
       block_list[0][0].setMark(BLANK);
       block_list[0][0].setHasKobuki(true);
       std::cout << "Block list initialezed successfully." << std::endl;
@@ -93,6 +94,7 @@ public:
       return true;
     } else {
       this->current_block = NULL;
+      this->next_block = this->current_block;
       std::cout << "Block list initialeze failed." << std::endl;
       return false;
     }
@@ -328,6 +330,20 @@ public:
     return;
   }
 
+  /*==== not use queue ====//
+  bool setPathToNextBlock(){
+    Block* goal = getNextBlock();
+    if ( goal != NULL ){
+      std::vector<Block *> dummy;
+      dummy.push_back( goal );
+      pushPath( dummy );
+      return(true);
+    }
+    else return(false);
+  }
+  //=======================*/
+
+  //==== use queue ====//
   bool setPathToNextBlock(){
     std::vector<Block *> path = mapgraph.getPathToNearestUnknownBlock( this->current_block );
     if( path.empty() ) return( false );
@@ -356,21 +372,21 @@ public:
     manager.changeDirection( speed, turnAngle );
   }
 
-  void RunToNext( double speed ){
+  void runToNext( double speed ){
     double runDistance = getNextDistance( this->next_block );
     manager.goStraight( speed, runDistance );
   }
 
   void foundObstacle(){
-    next_block->setMark(OBSTACLE);
-    double movement = getMovement( current_block );
+    this->next_block->setMark(OBSTACLE);
+    double movement = getMovement( this->next_block );
     Direction direction = getDirection();
-    setObstacleSize( next_block, movement, direction );
+    setObstacleSize( this->next_block, movement, direction );
   }
 
   void goBackToCurrent( double speed ){
-    next_block = current_block;
-    double runDistance = getNextDistance( next_block );
+    this->next_block = this->current_block;
+    double runDistance = getNextDistance( this->next_block );
     manager.goStraight( -speed, runDistance );
   }
 
@@ -404,6 +420,34 @@ public:
     }
     return( NULL );
   }
+
+  /*==== not use queue ====//
+  bool setNextIRBlock( void ){
+    Block *ir = map.searchIRBlock();
+    if( ir == MULL ) return(false);             // IRmark not found    
+    
+    std::vector<Block *> dummy;
+    dummy.push_back( ir );
+    map.pushPath( dummy );
+    return(true);
+  }
+  //=======================*/
+
+  //==== use queue ====//
+  bool setNextIRBlock( void ){
+    Block *ir = NULL;
+
+    while(1){
+      ir = searchIRBlock();
+      if( ir == NULL ) break;             // IRmark not found
+
+      if( setPathToTargetBlock(ir) ) break;   // set path
+      else ir->setIRMark( NOT_EXIST );    // cannot reach the block
+    }
+    
+    if( ir != NULL ) return(true);
+    else return(false);
+  }
   
   void clearIRMark( void ){
     std::queue<Block *> q;
@@ -432,8 +476,102 @@ public:
     return;
   }
 
+  void docking( void ){
+    manager.docking();
+    return;
+  }
 
-private:
+  //
+  void searchObstacleBlocks(){
+    for( unsigned int i = 0; i < this->block_list.size(); i++ ){
+      for( unsigned int j = 0; j < this->block_list[i].size(); j++ ){
+        if( this->block_list[i][j].getMark() == OBSTACLE ){
+          qu_obstacle.push( &this->block_list[i][j] );
+        }
+      }
+    }
+    return;
+  }
+
+  bool setNextUncheckedObstacle(){
+    if( qu_obstacle.empty() ){
+      this->next_obstacle = NULL;
+      return(false);
+    }
+    else {
+      this->next_obstacle = qu_obstacle.front();
+      qu_obstacle.pop();
+      flg_border = 0;
+      return(true);
+    }
+  }
+
+  Block* getUnmeasuredSideBlock( Block* obstacle ){
+    Block* side_block = NULL;
+
+    while( this->flg_border < 4 ){
+      double tmp;
+      switch( this->flg_border ){
+        case 0: tmp = obstacle->borders->left; break;
+        case 1: tmp = obstacle->borders->up; break;
+        case 2: tmp = obstacle->borders->right; break;
+        case 3: tmp = obstacle->borders->down; break;
+        default: tmp = -1.0; break;
+      }
+      if( tmp == 0.0 ){
+        side_block = mapgraph.getSideBlock( obstacle, this->flg_border );
+        if( side_block != NULL ) break;
+      }  
+       this->flg_border++;
+    }
+
+    return( side_block );
+  }
+
+  bool setNextSide(){
+    Block* next_side = getUnmeasuredSideBlock( next_obstacle );
+    if( next_side == NULL ) {
+      return(false);
+    }
+    else{
+      if( setPathToTargetBlock(next_side) ) return(true);
+      else(false);
+    }
+  }
+
+  void turnToObstacle( double speed ){
+    double turnAngle = getTurnAngle( this->next_obstacle );
+    manager.changeDirection( speed, turnAngle );
+  }
+
+  void runToObstacle( double speed ){
+    double runDistance = getNextDistance( this->next_obstacle );
+    manager.goStraight( speed, runDistance );
+  }
+
+  void measureBorder(){
+    double movement = getMovement( this->next_obstacle );
+    Direction direction = getDirection();
+    setObstacleSize( this->next_obstacle, movement, direction );
+    this->flg_border++;
+  }
+
+  // get method for eventmanager
+
+  kobuki::SensorManager::Data getSensorData(){
+    return( manager.getSensorData() );
+  }
+
+  kobuki::IRManager::Data getIRData(){
+    return( manager.getIRData() );
+  }
+
+  KobukiManager::RunData getRunData(){
+    return( manager.getRunData() );
+  }
+
+
+//private:
   Coordinate max;
   std::vector< std::vector<Block> > block_list;
   Block* current_block;
@@ -443,6 +581,9 @@ private:
   MapGraph mapgraph;
   double angle_to_next;
   double distance_to_next;
+  std::queue<Block *> qu_obstacle;
+  Block* next_obstacle;
+  int flg_border;
 
  };
 
