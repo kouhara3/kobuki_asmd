@@ -23,6 +23,7 @@
 *****************************************************************************/
 #define MINIMUM_SIZE 0.4
 #define KOBUKI_SIZE 0.35
+
 /*****************************************************************************
 ** Classes
 *****************************************************************************/
@@ -218,6 +219,7 @@ public:
         j++;
     }
 
+    std::cout << "first obstacle: 0," << j << std::endl;
     setWall(&this->block_list[0][j]);
   }
 
@@ -227,16 +229,17 @@ public:
 	int idx_y = this->block_list[0].size();
 
 	int tag_x = wall_block->getTagX();
-	int tag_y = wall_block->getTagX();
+	int tag_y = wall_block->getTagY();
 
 	if(!(tag_x > 0 && tag_y == 0))
 	{
 		wall_block->setMark(WALL);
+    std::cout << "checked: " << tag_x << "," << tag_y << std::endl;
 
 		for(int i = tag_x -1; i<= tag_x + 1; i++)
 		{
 			if(i == -1) i = 0;
-			for(int j = tag_y -1; i<= tag_y + 1; j++)
+			for(int j = tag_y -1; j<= tag_y + 1; j++)
 			{
 				if(j == -1) j = 0;
 				if(this->block_list[i][j].getMark() == OBSTACLE)
@@ -249,19 +252,31 @@ public:
 	else 
 	{
 		wall_block->setMark(WALL);
+    std::cout << "last: " << tag_x << "," << tag_y << std::endl;
 	}
+  std::cout << "finish" << std::endl;
       return;
   }
   
-  ////////////////////////////////////
+/*  ////////////////////////////////////
   void outputBlockList(){
     Global_Block_List = this->block_list;
     return;
   }
+
   void outputMax(){
     Global_Max = this->max;
     return;
   }
+*/
+  std::vector< std::vector<Block> > getBlockList(){
+    return( this->block_list );
+  }
+
+  Coordinate getMax(){
+    return( this->max );
+  }
+
   /////////////////////////////////////
 // method for queue
 
@@ -286,9 +301,10 @@ public:
 // private functions
 
   double getMovement( Block *block ){
-    double move = getNextDistance( block );
-    move += ( KOBUKI_SIZE / 2 ) - ( block->getSideLength() / 2 );
-    return move;
+    double distance = getNextDistance( block );
+    double border = ( block->getSideLength() / 2 * 3 ) - ( KOBUKI_SIZE / 2 ) - distance;
+    if( border < 0 ) border = 0;
+    return border;
   }
 
   Direction getDirection(){
@@ -306,15 +322,19 @@ public:
     switch( direct ){
       case RIGHT:
         block->borders->left = move;
+        std::cout << "left: " << move << std::endl;
         break;
       case UP:
         block->borders->down = move;
+        std::cout << "down: " << move << std::endl;
         break;
       case LEFT:
         block->borders->right = move;
+        std::cout << "right: " << move << std::endl;
         break;
       case DOWN:
         block->borders->up = move;
+        std::cout << "up: " << move << std::endl;
         break;
       default:
         break;
@@ -323,10 +343,14 @@ public:
 
 // functions for statemachine
 
+  void mappingBlank(){
+    current_block->setMark(BLANK);
+    return;
+  }
+
   void updateCurrent(){
     current_block->setHasKobuki(false);
     current_block = next_block;
-    current_block->setMark(BLANK);
     current_block->setHasKobuki(true);
     return;
   }
@@ -391,6 +415,9 @@ public:
     manager.goStraight( -speed, runDistance );
   }
 
+  void goBack( double speed, double distance ){
+    manager.goStraight( -speed, distance );
+  }
 
   void recordIR( void ){
     manager.getIRData();
@@ -398,10 +425,10 @@ public:
     
       kobuki::IRManager::Data ir_data = manager.getIRData();
 
-      if(  (ir_data[i].far_left     == 1)
+      if(/*  (ir_data[i].far_left     == 1)
         || (ir_data[i].far_center   == 1)
         || (ir_data[i].far_right    == 1)
-        || (ir_data[i].near_left    == 1)
+        ||*/ (ir_data[i].near_left    == 1)
         || (ir_data[i].near_center  == 1)
         || (ir_data[i].near_right   == 1) ){
         

@@ -1,9 +1,11 @@
+#define _MAIN
+
 #include <sys/time.h>
 #include <signal.h>
 
-#include "main.h"
 #include "stm.h"
 #include "stmEventManager.hpp"
+#include "SaveMap.cpp"
 
 EventManager eventManager;
 MEXUTimerEventManager timer;
@@ -69,21 +71,23 @@ int main (int argc, char *argv[])
   signal(SIGINT, signalHandler);
 
   std::cout << "Demo : Example of simple control loop." << std::endl;
+  std::cout << argv[0] << std::endl;
   //KobukiManager kobuki_manager;
 
   ecl::Sleep sleep(0.1);
   ecl::Pose2D<double> pose;
-  try {
-    while (!shutdown_req){
-      event.checkEvent( stm );
-      eventManager.execute();
-      sleep();
-      //pose = stm.kobukimanager->getPose();
-      //std::cout << "current pose: [" << pose.x() << ", " << pose.y() << ", " << pose.heading() << "]" << std::endl;
-    }
-  } catch ( ecl::StandardException &e ) {
-    std::cout << e.what();
+
+  while ( !stm.endflg ){
+    event.checkEvent( stm );
+    eventManager.execute();
+    sleep();
+    //pose = stm.kobukimanager->getPose();
+    //std::cout << "current pose: [" << pose.x() << ", " << pose.y() << ", " << pose.heading() << "]" << std::endl;
   }
+  
+  outputBlockList( stm.map );
+  outputMax( stm.map );
+  showMap(argc, argv);
 
 	return 0;
 }

@@ -98,7 +98,7 @@ public:
         if( j == 3 ) n = graph[min_node].up_node;
 
         if( n != NULL ){
-          if( n->cost < min_cost+1 ){
+          if( n->cost > min_cost+1 ){
             n->cost = min_cost+1;
             n->parent = min_node;
           }
@@ -110,7 +110,7 @@ public:
   }
 
   void updateShortestPath( Block* now ){
-    int current = size_x * now->getTagX() + now->getTagY();
+    int current = size_x * now->getTagY() + now->getTagX();
     dijkstra( current );
 
     return;

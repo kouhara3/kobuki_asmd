@@ -31,6 +31,7 @@ private:
   static const int matrix[];
 public:
   /* attributes */
+  bool endflg;
 
   int visit_dock;
 
@@ -49,6 +50,7 @@ public:
   void action(int state);
 
   void init(){
+    endflg = false;
     map.resize(5.2, 8.0);
     visit_dock = 0;
   }
@@ -82,10 +84,11 @@ public:
 
   void setNextIRBlock() {
     if( map.setNextIRBlock() ) goNext();
-    else goFinish();
+    else std::cout<<"IRBlock not found"<<std::endl;
   }
 
   void docking() {
+    map.clearIRMark();
     map.docking();
     visit_dock++;
     goNext();
@@ -93,9 +96,7 @@ public:
 
   void checkDock() {
     if( visit_dock < 2 ){
-      map.clearIRMark();
-      map.goBackToCurrent( 0.3 );
-      goNext();
+      map.goBack( 0.3, 0.1 );
     }
     else goFinish();
   }
@@ -106,7 +107,7 @@ public:
   }
 
   void mapping() {
-    map.updateCurrent();
+    map.mappingBlank();
     map.recordIR();
     goNext();
   }
@@ -118,6 +119,7 @@ public:
 
   void checkNext() {
     std::cout<< "next: " << map.next_block->getTagX() << "," << map.next_block->getTagY() << std::endl;
+    map.updateCurrent();
     if( map.isReached() ){
       goFinish();
     }
@@ -137,8 +139,12 @@ public:
 
   void initializeMap() {
     map.checkWall();
-    map.searchObstacleBlocks();
+    //map.searchObstacleBlocks();
     goNext();
+  }
+
+  void stop(){
+    endflg = true;
   }
 
   void goNext() {
