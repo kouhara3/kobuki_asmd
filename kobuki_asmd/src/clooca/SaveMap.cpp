@@ -120,7 +120,7 @@
           float pointY = -1.0f + j*block_height;
           glEnable(GL_LINE_STIPPLE);
           glLineStipple(2, 0x0F0F);
-          glLineWidth(2.0f);
+          glLineWidth(1.0f);
           glColor3f(0.0f, 0.0f, 0.0f);
 
 	  glBegin(GL_LINES); 
@@ -131,12 +131,18 @@
           glEnd();
           
           glDisable(GL_LINE_STIPPLE);
-
-          if(Global_Block_List[i][j].getMark() == OBSTACLE || Global_Block_List[i][j].getMark() == WALL)
+          
+          if(Global_Block_List[i][j].getMark() == OBSTACLE )
           {
             Borders* borders = Global_Block_List[i][j].borders;
-            glColor3f(1.0f, 0.0f, 0.0f);
-            //glRectf(pointX + borders->left/width, pointY + borders->down/height, pointX + (BLOCK_SIZE-borders->right)/width, pointY + (BLOCK_SIZE-borders->up)/height);
+
+            borders->left *= 100;
+            borders->up *= 100;
+            borders->down *= 100;
+            borders->right *= 100;
+
+            glColor3f(0.5f, 0.0f, 0.0f);
+            
             if(borders->left != 0.0f)
             {
               glRectf(pointX + borders->left/width, pointY, pointX + block_width, pointY + block_height);
@@ -158,7 +164,14 @@
           if(Global_Block_List[i][j].getMark() == WALL)
           {
             Borders* borders = Global_Block_List[i][j].borders;
-            glColor3f(0.0f, 0.0f, 0.0f);
+
+            borders->left *= 100;
+            borders->up *= 100;
+            borders->down *= 100;
+            borders->right *= 100;
+
+            glLineWidth(2.0f);
+            glColor3f(0.0f, 1.0f, 0.0f);
 
             if(borders->left != 0.0f)
             {

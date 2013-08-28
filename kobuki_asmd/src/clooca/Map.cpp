@@ -227,6 +227,7 @@ public:
 
   	int idx_x = this->block_list.size();
 	int idx_y = this->block_list[0].size();
+
 	int tag_x = wall_block->getTagX();
 	int tag_y = wall_block->getTagY();
 
