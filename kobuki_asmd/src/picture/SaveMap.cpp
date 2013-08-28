@@ -121,7 +121,7 @@
           glEnable(GL_LINE_STIPPLE);
           glLineStipple(2, 0x0F0F);
           glLineWidth(2.0f);
-          glColor3f(0.0f, 0.0f, 0.0f);
+          glColor3f(0.95f, 0.95f, 0.95f);
 
 	  glBegin(GL_LINES); 
 	    glVertex2f(pointX, pointY);                                 glVertex2f(pointX + block_width, pointY); 
@@ -135,53 +135,56 @@
           if(Global_Block_List[i][j].getMark() == OBSTACLE )
           {
             Borders* borders = Global_Block_List[i][j].borders;
-            glColor3f(1.0f, 0.0f, 0.0f);
-            //glRectf(pointX + borders->left/width, pointY + borders->down/height, pointX + (BLOCK_SIZE-borders->right)/width, pointY + (BLOCK_SIZE-borders->up)/height);
+
+            glColor3f(0.0f, 0.0f, 1.0f);
+            
             if(borders->left != 0.0f)
             {
-              glRectf(pointX + borders->left/width, pointY, pointX + block_width, pointY + block_height);
+              glRectf(pointX + borders->left*100/width, pointY, pointX + block_width, pointY + block_height);
             }
             else if(borders->right != 0.0f) 
             {
-              glRectf(pointX , pointY, pointX + (BLOCK_SIZE-borders->right)/width, pointY + block_height);
+              glRectf(pointX , pointY, pointX + (BLOCK_SIZE-borders->right*100)/width, pointY + block_height);
             }
             else if(borders->up != 0.0f) 
             {
-              glRectf(pointX, pointY, pointX + block_width, pointY + (BLOCK_SIZE-borders->up)/height);
+              glRectf(pointX, pointY, pointX + block_width, pointY + (BLOCK_SIZE-borders->up*100)/height);
             }
             else if(borders->down != 0.0f) 
             {
-              glRectf(pointX , pointY + borders->down/height , pointX + block_width, pointY + block_width);
+              glRectf(pointX , pointY + borders->down*100/height , pointX + block_width, pointY + block_width);
             }
           }
 
           if(Global_Block_List[i][j].getMark() == WALL)
           {
             Borders* borders = Global_Block_List[i][j].borders;
-            glColor3f(0.0f, 0.0f, 0.0f);
+
+            glLineWidth(3.0f);
+            glColor3f(1.0f, 0.0f, 0.0f);
 
             if(borders->left != 0.0f)
             {
               glBegin(GL_LINES); 
-	        glVertex2f(pointX + borders->left/width, pointY);  glVertex2f(pointX + borders->left/width, pointY + block_height); 
+	        glVertex2f(pointX + borders->left*100/width, pointY);  glVertex2f(pointX + borders->left*100/width, pointY + block_height); 
               glEnd();
             }
             else if(borders->right != 0.0f) 
             {
               glBegin(GL_LINES); 
-	        glVertex2f(pointX + (BLOCK_SIZE-borders->right)/width, pointY);  glVertex2f(pointX + (BLOCK_SIZE-borders->right)/width, pointY + block_height); 
+	        glVertex2f(pointX + (BLOCK_SIZE-borders->right*100)/width, pointY);  glVertex2f(pointX + (BLOCK_SIZE-borders->right*100)/width, pointY + block_height); 
               glEnd();
             }
             if(borders->up != 0.0f)
             {
               glBegin(GL_LINES); 
-	        glVertex2f(pointX, pointY + (BLOCK_SIZE-borders->up)/height);  glVertex2f(pointX + block_width, pointY+ (BLOCK_SIZE-borders->up)/height); 
+	        glVertex2f(pointX, pointY + (BLOCK_SIZE-borders->up*100)/height);  glVertex2f(pointX + block_width, pointY+ (BLOCK_SIZE-borders->up*100)/height); 
               glEnd();
             }
             else if(borders->down != 0.0f) 
             {
               glBegin(GL_LINES); 
-	        glVertex2f(pointX, pointY + borders->down/height);                                 glVertex2f(pointX + block_width, pointY + borders->down/height); 
+	        glVertex2f(pointX, pointY + borders->down*100/height); glVertex2f(pointX + block_width, pointY + borders->down*100/height); 
               glEnd();
             }
           }
@@ -220,6 +223,13 @@ int main(int argc, char * argv[])
           Coordinate coord;
           coord.setCoordinate(i*DEFAULT_BLOCK_LENGTH, j*(DEFAULT_BLOCK_LENGTH));
           Block block(coord, DEFAULT_BLOCK_LENGTH, i, j);
+          if((j == 3) && (i == 3))
+          {
+            block.setMark(WALL);
+            Borders b;
+            b.down = 0.2f;
+            block.borders = &b;
+          }
   	  list.push_back(block);
         }
 
