@@ -6,7 +6,6 @@
 #include "Coordinate.cpp"
 #include "b.cpp"
 
-#define BLOCK_SIZE 40
 #define BMP_Header_Length 54  
   
 
@@ -108,8 +107,8 @@
     //printf("[width: %f]", width);
     float height = Global_Max.getCoordinateY()*100/2;
     //printf("[height: %f]", width);
-    float block_width =  BLOCK_SIZE/width;
-    float block_height =  BLOCK_SIZE/height;
+    float block_width =  DEFAULT_BLOCK_LENGTH*100/width;
+    float block_height =  DEFAULT_BLOCK_LENGTH*100/height;
     int idx_x = Global_Block_List.size();
     int idx_y = Global_Block_List[0].size();
     
@@ -149,11 +148,11 @@
             }
             else if(borders->right != 0.0f) 
             {
-              glRectf(pointX , pointY, pointX + (BLOCK_SIZE-borders->right*100)/width, pointY + block_height);
+              glRectf(pointX , pointY, pointX + (DEFAULT_BLOCK_LENGTH-borders->right)*100/width, pointY + block_height);
             }
             else if(borders->up != 0.0f) 
             {
-              glRectf(pointX, pointY, pointX + block_width, pointY + (BLOCK_SIZE-borders->up*100)/height);
+              glRectf(pointX, pointY, pointX + block_width, pointY + (DEFAULT_BLOCK_LENGTH-borders->up)*100/height);
             }
             else if(borders->down != 0.0f) 
             {
@@ -205,8 +204,8 @@
           {
             Borders* borders = Global_Wall_List[i].borders;
 
-            float blockX = -1.0f + Global_Wall_List[i].getCenterPoint().getCoordinateX()*100.f/width ;
-            float blockY = -1.0f + Global_Wall_List[i].getCenterPoint().getCoordinateY()*100.f/height ;
+            float blockX = -1.0f + (Global_Wall_List[i].getCenterPoint().getCoordinateX() + DEFAULT_BLOCK_LENGTH) *100.f/width ;
+            float blockY = -1.0f + (Global_Wall_List[i].getCenterPoint().getCoordinateY() + DEFAULT_BLOCK_LENGTH) *100.f/height ;
 
 
             glLineWidth(3.0f);
@@ -222,15 +221,15 @@
             }
             else if(borders->right != 0.0f) 
             {
-                glVertex2f(wallPointX, wallPointY);  glVertex2f(blockX + (BLOCK_SIZE-borders->right*100)/width, blockY + block_height/2); 
-                wallPointX = blockX + (BLOCK_SIZE-borders->right*100)/width;
+                glVertex2f(wallPointX, wallPointY);  glVertex2f(blockX + (DEFAULT_BLOCK_LENGTH-borders->right)*100/width, blockY + block_height/2); 
+                wallPointX = blockX + (DEFAULT_BLOCK_LENGTH-borders->right)*100/width;
                 wallPointY = blockY + block_height/2;
             }
             if(borders->up != 0.0f)
             {
-                glVertex2f(wallPointX, wallPointY);  glVertex2f(blockX + block_width/2, blockY+ (BLOCK_SIZE-borders->up*100)/height); 
+                glVertex2f(wallPointX, wallPointY);  glVertex2f(blockX + block_width/2, blockY+ (DEFAULT_BLOCK_LENGTH-borders->up)*100/height); 
                 wallPointX = wallPointX + block_width/2;
-                wallPointY = wallPointY+ (BLOCK_SIZE-borders->up*100)/height;
+                wallPointY = wallPointY+ (DEFAULT_BLOCK_LENGTH-borders->up)*100/height;
             }
             else if(borders->down != 0.0f) 
             {
@@ -297,7 +296,7 @@ int main(int argc, char * argv[])
       
         for(int j = 0; j<5; j++) {
           Coordinate coord;
-          coord.setCoordinate(i*DEFAULT_BLOCK_LENGTH, j*(DEFAULT_BLOCK_LENGTH));
+          coord.setCoordinate(i*DEFAULT_BLOCK_LENGTH-0.4f, j*DEFAULT_BLOCK_LENGTH-0.4f);
           Block block(coord, DEFAULT_BLOCK_LENGTH, i, j);
           if(i == 3) 
           {
