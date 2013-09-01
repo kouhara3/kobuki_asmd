@@ -8,9 +8,12 @@
 
 #define BLOCK_SIZE 40
 #define BMP_Header_Length 54  
+  
 
   std::vector< std::vector<Block> > Global_Block_List;
+  std::vector< Block > Global_Wall_List;
   Coordinate Global_Max;
+  int Save_Flag = 0;
 
   void bmp_file(GLint WindowWidth, GLint WindowHeight)
   {
@@ -123,8 +126,8 @@
           glLineWidth(1.0f);
           glColor3f(0.97f, 0.97f, 0.97f);
 
-	        glBegin(GL_LINES); 
-	          glVertex2f(pointX, pointY);                                 glVertex2f(pointX + block_width, pointY); 
+	  glBegin(GL_LINES); 
+	    glVertex2f(pointX, pointY);                                 glVertex2f(pointX + block_width, pointY); 
             glVertex2f(pointX + block_width, pointY);                   glVertex2f(pointX + block_width, pointY + block_height); 
             glVertex2f(pointX + block_width, pointY + block_height);    glVertex2f(pointX, pointY + block_height); 
             glVertex2f(pointX, pointY + block_height);                  glVertex2f(pointX, pointY);
@@ -183,12 +186,63 @@
             }
             glEnd();
           }
-
       }
     }
 
+
+
+/*//////////make wall start////////////
+
+    float wallPointX = 0.0f;
+    float wallPointY = 0.0f;
+
+          for(int i = 0; i < Global_Wall_List.size(); i++)
+          {
+            Borders* borders = Global_Wall_List[i].borders;
+
+
+            glLineWidth(3.0f);
+            glColor3f(1.0f, 0.0f, 0.0f);
+
+            glBegin(GL_LINES); 
+            if(borders->left != 0.0f)
+            {
+                glVertex2f(wallPointX, wallPointY);  glVertex2f(wallPointX + borders->left/width, wallPointY + block_height/2); 
+                wallPointX = wallPointX + borders->left/width;
+                wallPointY = wallPointY + block_height/2;
+            }
+            else if(borders->right != 0.0f) 
+            {
+                glVertex2f(wallPointX, wallPointY);  glVertex2f(wallPointX + (BLOCK_SIZE-borders->right)/width, wallPointY + block_height/2); 
+                wallPointX =wallPointX + (BLOCK_SIZE-borders->right)/width;
+                wallPointY = wallPointY + block_height/2;
+            }
+            if(borders->up != 0.0f)
+            {
+                glVertex2f(wallPointX, wallPointY);  glVertex2f(wallPointX + block_width/2, wallPointY+ (BLOCK_SIZE-borders->up)/height); 
+                wallPointX = wallPointX + block_width/2;
+                wallPointY = wallPointY+ (BLOCK_SIZE-borders->up)/height;
+            }
+            else if(borders->down != 0.0f) 
+            {
+                glVertex2f(wallPointX, wallPointY);  glVertex2f(wallPointX + block_width/2, wallPointY + borders->down/height); 
+                wallPointX = wallPointX + block_width/2;
+                wallPointY = wallPointY + borders->down/height;
+            }
+            glEnd();
+          }
+
+////////make wall over////////
+
+
     glFlush();
     glutSwapBuffers();
+
+    if(Save_Flag != 1)
+    {
+      save();
+      Save_Flag = 1;
+    }
   }
 
   int showMap(int argc, char * argv[])

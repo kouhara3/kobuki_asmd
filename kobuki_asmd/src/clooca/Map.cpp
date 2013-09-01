@@ -58,6 +58,7 @@ public:
     
     int idx_x = this->max.getCoordinateX()/DEFAULT_BLOCK_LENGTH;
     int idx_y = this->max.getCoordinateY()/DEFAULT_BLOCK_LENGTH;
+
     std::cout << "idx_x = " << idx_x << std::endl; 
     std::cout << "idx_y = " << idx_y << std::endl;
    
@@ -69,7 +70,7 @@ public:
       
         for(int j = 0; j<idx_y; j++) {
           Coordinate coord;
-          coord.setCoordinate(i*DEFAULT_BLOCK_LENGTH, j*(DEFAULT_BLOCK_LENGTH-0.04));
+          coord.setCoordinate(i*DEFAULT_BLOCK_LENGTH-0.4f, j*DEFAULT_BLOCK_LENGTH-0.4f);
           Block block(coord, DEFAULT_BLOCK_LENGTH, i, j);
   	  list.push_back(block);
         }
@@ -86,10 +87,10 @@ public:
         }
       }
 
-      this->current_block = (Block*) &block_list[0][0];
+      this->current_block = (Block*) &block_list[1][1];
       this->next_block = this->current_block;
-      block_list[0][0].setMark(BLANK);
-      block_list[0][0].setHasKobuki(true);
+      //block_list[1][1].setMark(BLANK);
+      //block_list[1][1].setHasKobuki(true);
       std::cout << "Block list initialezed successfully." << std::endl;
       std::cout << "Size of block_list is [" << this->block_list.size() <<"]" << std::endl;
       return true;
@@ -158,7 +159,7 @@ public:
 
     double turn_angle = (atan2(dist_y,dist_x)/ecl::pi)*180 - angle_now;
 
-    if((turn_angle < 5.0) && (turn_angle > -5.0)) turn_angle = 0;
+    //if((turn_angle < 5.0) && (turn_angle > -5.0)) turn_angle = 0;
     if(turn_angle>180.0) turn_angle = turn_angle - 360.0;
     if(turn_angle<-180.0) turn_angle = turn_angle + 360.0;
     //std::cout << "angle: " << angle_now << std::endl;
@@ -234,7 +235,10 @@ public:
 	if(!(tag_x > 0 && tag_y == 0))
 	{
 		wall_block->setMark(WALL);
-    std::cout << "checked: " << tag_x << "," << tag_y << std::endl;
+                std::cout << "checked: " << tag_x << "," << tag_y << std::endl;
+
+                //Block temp_block = &wall_block;
+                //wall_list.push_back(temp_block);
 
 		for(int i = tag_x -1; i<= tag_x + 1; i++)
 		{
@@ -271,6 +275,10 @@ public:
 */
   std::vector< std::vector<Block> > getBlockList(){
     return( this->block_list );
+  }
+
+  std::vector<Block> getWallList(){
+    return( this->wall_list );
   }
 
   Coordinate getMax(){
@@ -628,6 +636,7 @@ public:
 //private:
   Coordinate max;
   std::vector< std::vector<Block> > block_list;
+  std::vector< Block > wall_list;
   Block* current_block;
   Block* next_block;
   KobukiManager manager;
