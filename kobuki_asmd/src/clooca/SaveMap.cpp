@@ -13,7 +13,7 @@
   std::vector< std::vector<Block> > Global_Block_List;
   std::vector< Block > Global_Wall_List;
   Coordinate Global_Max;
-  int Save_Flag = 0;
+  static int Save_Flag = 0;
 
   void bmp_file(GLint WindowWidth, GLint WindowHeight)
   {
@@ -232,7 +232,7 @@
             glEnd();
           }
 
-////////make wall over////////
+*////////make wall over////////
 
 
     glFlush();
