@@ -1,4 +1,3 @@
-#pragma once
 
 #ifndef D_MEXU_H_
 #define D_MEXU_H_
@@ -9,7 +8,7 @@
 
 /* Event ID Definitions */
 
-#define KobukiStateMachine_EVENT_BUMPER_PRESSED 0
+#define KobukiStateMachine_EVENT_BUTTON_PUSHED 0
 
 #define KobukiStateMachine_EVENT_NEXT 1
 
@@ -19,7 +18,11 @@
 
 #define KobukiStateMachine_EVENT_RUN_REACHED 4
 
-#define KobukiStateMachine_EVENT_IGNORE 5
+#define KobukiStateMachine_EVENT_BUMPER_PRESSED 5
+
+#define KobukiStateMachine_EVENT_IGNORE 6
+
+
 
 /*====================================================
  * KobukiStateMachine class
@@ -31,11 +34,12 @@ private:
   static const int matrix[];
 public:
   /* attributes */
-  bool endflg;
 
   int visit_dock;
 
   Map map;
+
+  bool endflg;
 
   /* methods */                          
   KobukiStateMachine() : StateMachine(){
@@ -49,79 +53,81 @@ public:
   int execute(MEXUEvent *event);
   void action(int state);
 
-  void init(){
-    endflg = false;
-    map.resize(5.2, 8.0);
+  void init() {
+      map.resize(5.2, 8.0);
     visit_dock = 0;
+    endflg = false;
   }
 
   void setNextObstacle() {
-    if( map.setNextUncheckedObstacle() ) goNext();
+      if( map.setNextUncheckedObstacle() ) goNext();
     else goFinish();
   }
 
   void setNextSide() {
-    if( map.setNextSide() ) goNext();
+      if( map.setNextSide() ) goNext();
     else goFinish();
   }
 
   void turnToObstacle() {
-    map.turnToObstacle( 1.0 );
+      map.turnToObstacle( 1.0 );
   }
 
   void runToObstacle() {
-    map.runToObstacle( 0.3 );
+      map.turnToObstacle( 1.0 );
   }
 
   void measureBorder() {
-    map.measureBorder();
+      map.measureBorder();
   }
 
   void saveMap() {
-    map.showMe();
-    map.showIR();
+      map.showMe();
     goFinish();
   }
 
   void setNextIRBlock() {
-    if( map.setNextIRBlock() ) goNext();
-    else std::cout<<"IRBlock not found"<<std::endl;
+      if( map.setNextIRBlock() ) goNext();
+    else goFinish();
   }
 
   void docking() {
-    map.clearIRMark();
-    map.docking();
+      map.docking();
     visit_dock++;
     goNext();
   }
 
   void checkDock() {
-    if( visit_dock < 2 ){
-      map.goBack( 0.3, 0.1 );
+      if( visit_dock < 2 ){
+      map.clearIRMark();
+      map.goBackToCurrent( 0.3 );
+      goNext();
     }
     else goFinish();
   }
 
   void foundObstacle() {
-    map.foundObstacle();
+      map.foundObstacle();
     map.goBackToCurrent(0.3);
   }
 
   void mapping() {
-    map.mappingBlank();
+      map.mappingBlank();
     map.recordIR();
     goNext();
   }
 
   void setNextBlock() {
-    if( map.setPathToNextBlock() ) goNext();
+      if( map.setPathToNextBlock() ) goNext();
     else goFinish();
   }
 
   void checkNext() {
+
     std::cout<< "next: " << map.next_block->getTagX() << "," << map.next_block->getTagY() << std::endl;
     map.showMe();
     map.updateCurrent();
+
     if( map.isReached() ){
       goFinish();
     }
@@ -132,29 +138,29 @@ public:
   }
 
   void turnToNext() {
-    map.turnToNext( 1.0 );
+      map.turnToNext( 1.0 );
   }
 
   void runToNext() {
-    map.runToNext( 0.3 );
+      map.runToNext( 0.3 );
   }
 
   void initializeMap() {
-    map.checkWall();
-    //map.searchObstacleBlocks();
+      map.checkWall();
+//    map.searchObstacleBlocks();
     goNext();
   }
 
-  void stop(){
-    endflg = true;
-  }
-
   void goNext() {
-    this->sendEvent( KobukiStateMachine_EVENT_NEXT );
+      this->sendEvent( KobukiStateMachine_EVENT_NEXT );
   }
 
   void goFinish() {
-    this->sendEvent( KobukiStateMachine_EVENT_FINISH );
+      this->sendEvent( KobukiStateMachine_EVENT_FINISH );
+  }
+
+  void stop() {
+  endflg = true;
   }
 
 };
@@ -209,6 +215,7 @@ public:
 #define KobukiStateMachine_STATE_checkDock 22
 
 #define KobukiStateMachine_STATE_stop 23
+
 
 
 

@@ -89,8 +89,10 @@ public:
 
       this->current_block = (Block*) &block_list[1][1];
       this->next_block = this->current_block;
+
       //block_list[1][1].setMark(BLANK);
       //block_list[1][1].setHasKobuki(true);
+
       std::cout << "Block list initialezed successfully." << std::endl;
       std::cout << "Size of block_list is [" << this->block_list.size() <<"]" << std::endl;
       return true;

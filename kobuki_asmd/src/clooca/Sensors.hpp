@@ -11,7 +11,8 @@ public:
     char center_bumper;
     char right_bumper;
     char charger;
-    Data(){ left_bumper=0; center_bumper=0; right_bumper=0; charger=0; }
+    char button;
+    Data(){ left_bumper=0; center_bumper=0; right_bumper=0; charger=0; button=0;}
   };
 
   void update( kobuki::CoreSensors::Data& new_data ){
@@ -20,20 +21,20 @@ public:
       if (new_data.bumper & CoreSensors::Flags::LeftBumper) {
         data.left_bumper = 1;
       } else {
-        data.left_bumper = 0;;
+        data.left_bumper = 0;
       }
     }
     if ((new_data.bumper ^ last_data.bumper) & CoreSensors::Flags::CenterBumper) {
       if (new_data.bumper & CoreSensors::Flags::CenterBumper) {
         data.center_bumper = 1;
       } else {
-        data.center_bumper = 0;;
+        data.center_bumper = 0;
       }
     }
     if ((new_data.bumper ^ last_data.bumper) & CoreSensors::Flags::RightBumper) {
       if (new_data.bumper & CoreSensors::Flags::RightBumper) {
       } else {
-        data.right_bumper = 0;;
+        data.right_bumper = 0;
       }
     }
 
@@ -45,6 +46,15 @@ public:
       data.charger = 1;
     } else {
       data.charger = 0;
+    }
+
+    // check button
+    if(( new_data.buttons ^ last_data.buttons ) & CoreSensors::Flags::Button0){
+      if ( new_data.buttons & CoreSensors::Flags::Button0) {
+        data.button = 1;
+      } else {
+        data.button = 0;
+      }
     }
 
     // update data
