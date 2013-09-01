@@ -1,16 +1,19 @@
-#include "b.cpp"
 #include <stdio.h>
 #include <stdlib.h>
 #include <iostream>
-#include <math.h>
 #include <vector>
 #include <GL/glut.h>
+#include "Coordinate.cpp"
+#include "b.cpp"
 
 #define BLOCK_SIZE 40
 #define BMP_Header_Length 54  
+  
 
   std::vector< std::vector<Block> > Global_Block_List;
+  std::vector< Block > Global_Wall_List;
   Coordinate Global_Max;
+  static int Save_Flag = 0;
 
   void bmp_file(GLint WindowWidth, GLint WindowHeight)
   {
@@ -35,13 +38,13 @@
 	if( pPixelData == 0 ) 
 		exit(0); 
 	pDummyFile = fopen("/home/winter/dummy.bmp", "rb+");
-	if( pDummyFile == 0 ) 
+  if( pDummyFile == 0 ) 
 	{  
            printf("Can't open dummy.bmp\n");
    	   exit(0); 
 	}
-	pWritingFile = fopen("/home/winter/Map.bmp", "wb+"); 
-	if( pWritingFile == 0 )
+	pWritingFile = fopen("/home/winter/Map.bmp", "wb+");
+  if( pWritingFile == 0 )
 	{  
            printf("Can't open Map.bmp\n");
    	   exit(0); 
@@ -69,14 +72,14 @@
 	fclose(pWritingFile);
 	free(pPixelData);
 	
-	printf("Picture was saved as grap.bmp\n");
+	printf("Picture was saved as map.bmp\n");
   }
 
   void save()
   {
 
-    float width = Global_Max.getCoordinateX()*100/2;
-    float height = Global_Max.getCoordinateY()*100/2;
+    float width = Global_Max.getCoordinateX()*100;
+    float height = Global_Max.getCoordinateY()*100;
     bmp_file((GLint)width, (GLint)height);
     
     return;
@@ -99,6 +102,7 @@
 
   void makeMap()
   {
+    printf("Make map start!\n");
 
     float width = Global_Max.getCoordinateX()*100/2;
     //printf("[width: %f]", width);
@@ -112,6 +116,7 @@
     glClearColor(1.0f, 1.0f ,1.0f, 0.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
+
     for(int i = 0; i<idx_x; i++){
 
       float pointX = -1.0f + i * block_width;
@@ -120,8 +125,8 @@
           float pointY = -1.0f + j*block_height;
           glEnable(GL_LINE_STIPPLE);
           glLineStipple(2, 0x0F0F);
-          glLineWidth(2.0f);
-          glColor3f(0.95f, 0.95f, 0.95f);
+          glLineWidth(1.0f);
+          glColor3f(0.97f, 0.97f, 0.97f);
 
 	  glBegin(GL_LINES); 
 	    glVertex2f(pointX, pointY);                                 glVertex2f(pointX + block_width, pointY); 
@@ -131,7 +136,7 @@
           glEnd();
           
           glDisable(GL_LINE_STIPPLE);
-
+          
           if(Global_Block_List[i][j].getMark() == OBSTACLE )
           {
             Borders* borders = Global_Block_List[i][j].borders;
@@ -155,45 +160,100 @@
               glRectf(pointX , pointY + borders->down*100/height , pointX + block_width, pointY + block_width);
             }
           }
-
+/*
           if(Global_Block_List[i][j].getMark() == WALL)
           {
             Borders* borders = Global_Block_List[i][j].borders;
 
+
             glLineWidth(3.0f);
             glColor3f(1.0f, 0.0f, 0.0f);
 
+            glBegin(GL_LINES); 
             if(borders->left != 0.0f)
-            {
-              glBegin(GL_LINES); 
-	        glVertex2f(pointX + borders->left*100/width, pointY);  glVertex2f(pointX + borders->left*100/width, pointY + block_height); 
-              glEnd();
+            {              
+	        glVertex2f(pointX + borders->left/width, pointY);  glVertex2f(pointX + borders->left/width, pointY + block_height); 
             }
             else if(borders->right != 0.0f) 
             {
-              glBegin(GL_LINES); 
-	        glVertex2f(pointX + (BLOCK_SIZE-borders->right*100)/width, pointY);  glVertex2f(pointX + (BLOCK_SIZE-borders->right*100)/width, pointY + block_height); 
-              glEnd();
+	        glVertex2f(pointX + (BLOCK_SIZE-borders->right)/width, pointY);  glVertex2f(pointX + (BLOCK_SIZE-borders->right)/width, pointY + block_height); 
             }
             if(borders->up != 0.0f)
             {
-              glBegin(GL_LINES); 
-	        glVertex2f(pointX, pointY + (BLOCK_SIZE-borders->up*100)/height);  glVertex2f(pointX + block_width, pointY+ (BLOCK_SIZE-borders->up*100)/height); 
-              glEnd();
+	        glVertex2f(pointX, pointY + (BLOCK_SIZE-borders->up)/height);  glVertex2f(pointX + block_width, pointY+ (BLOCK_SIZE-borders->up)/height); 
             }
             else if(borders->down != 0.0f) 
             {
-              glBegin(GL_LINES); 
-	        glVertex2f(pointX, pointY + borders->down*100/height); glVertex2f(pointX + block_width, pointY + borders->down*100/height); 
-              glEnd();
+	        glVertex2f(pointX, pointY + borders->down/height);  glVertex2f(pointX + block_width, pointY + borders->down/height); 
             }
+            glEnd();
           }
-
+*/
       }
     }
 
+
+
+//////////make wall start////////////
+
+    printf("Make wall start!\n");
+
+    float wallPointX = -1.0f;
+    float wallPointY = -1.0f;
+
+          for(int i = 0; i < Global_Wall_List.size(); i++)
+          {
+            Borders* borders = Global_Wall_List[i].borders;
+
+            float blockX = -1.0f + Global_Wall_List[i].getCenterPoint().getCoordinateX()*100.f/width ;
+            float blockY = -1.0f + Global_Wall_List[i].getCenterPoint().getCoordinateY()*100.f/height ;
+
+
+            glLineWidth(3.0f);
+            glColor3f(1.0f, 0.0f, 0.0f);
+
+            glBegin(GL_LINES); 
+            if(borders->left != 0.0f)
+            {
+                printf("wallPointX,Y:[%f , %f]\n",wallPointX, wallPointY);
+                glVertex2f(wallPointX, wallPointY);  glVertex2f(blockX + borders->left*100/width, blockY + block_height/2); 
+                wallPointX = blockX + borders->left*100/width;
+                wallPointY = blockY + block_height/2;
+            }
+            else if(borders->right != 0.0f) 
+            {
+                glVertex2f(wallPointX, wallPointY);  glVertex2f(blockX + (BLOCK_SIZE-borders->right*100)/width, blockY + block_height/2); 
+                wallPointX = blockX + (BLOCK_SIZE-borders->right*100)/width;
+                wallPointY = blockY + block_height/2;
+            }
+            if(borders->up != 0.0f)
+            {
+                glVertex2f(wallPointX, wallPointY);  glVertex2f(blockX + block_width/2, blockY+ (BLOCK_SIZE-borders->up*100)/height); 
+                wallPointX = wallPointX + block_width/2;
+                wallPointY = wallPointY+ (BLOCK_SIZE-borders->up*100)/height;
+            }
+            else if(borders->down != 0.0f) 
+            {
+                glVertex2f(wallPointX, wallPointY);  glVertex2f(blockX + block_width/2, blockY + borders->down*100/height); 
+                wallPointX = blockX + block_width/2;
+                wallPointY = blockY + borders->down*100/height;
+            }
+            glEnd();
+          }
+    printf("Make wall end!\n");
+///////make wall over////////
+
+    printf("Make map end!\n");
+
     glFlush();
     glutSwapBuffers();
+
+    if(Save_Flag != 1)
+    {
+      save();
+      Save_Flag = 1;
+    }
+
   }
 
   int showMap(int argc, char * argv[])
@@ -212,7 +272,23 @@
     glutMainLoop();
     return 0;
   }
-  
+/*
+  void outputBlockList( Map& map ){
+    Global_Block_List = map.getBlockList();
+    return;
+  }
+
+void outputWallList( Map& map ){
+    Global_Wall_List = map.getWallList();
+    return;
+  }
+
+  void outputMax( Map& map ){
+    Global_Max = map.getMax();
+    return;
+  }
+*/
+
 int main(int argc, char * argv[])
 {
   for (int i = 0; i < 5; i++)
@@ -223,12 +299,13 @@ int main(int argc, char * argv[])
           Coordinate coord;
           coord.setCoordinate(i*DEFAULT_BLOCK_LENGTH, j*(DEFAULT_BLOCK_LENGTH));
           Block block(coord, DEFAULT_BLOCK_LENGTH, i, j);
-          if((j == 3) && (i == 3))
+          if(i == 3) 
           {
-            block.setMark(WALL);
             Borders b;
-            b.down = 0.2f;
+            b.left = 0.1f;
             block.borders = &b;
+            block.setMark(WALL);
+            Global_Wall_List.push_back(block);
           }
   	  list.push_back(block);
         }
@@ -237,7 +314,8 @@ int main(int argc, char * argv[])
         list.clear(); 
   }
 
-  Global_Max.setCoordinate(2.0f, 2.0f);
+  Global_Max.setCoordinate(2.4f, 2.4f);
 
   return showMap(argc, argv);
 }
+
