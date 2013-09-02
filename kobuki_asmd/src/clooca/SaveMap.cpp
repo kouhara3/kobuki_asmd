@@ -124,7 +124,7 @@
           glEnable(GL_LINE_STIPPLE);
           glLineStipple(2, 0x0F0F);
           glLineWidth(1.0f);
-          glColor3f(0.97f, 0.97f, 0.97f);
+          glColor3f(0.9f, 0.9f, 0.9f);
 
 	  glBegin(GL_LINES); 
 	    glVertex2f(pointX, pointY);                                 glVertex2f(pointX + block_width, pointY); 
@@ -134,7 +134,7 @@
           glEnd();
           
           glDisable(GL_LINE_STIPPLE);
-          
+/////obstacle
           if(Global_Block_List[i][j].getMark() == OBSTACLE )
           {
             Borders* borders = Global_Block_List[i][j].borders;
@@ -158,58 +158,82 @@
               glRectf(pointX , pointY + borders->down*100/height , pointX + block_width, pointY + block_width);
             }
           }
-/*
+
+//////wall
           if(Global_Block_List[i][j].getMark() == WALL)
           {
             Borders* borders = Global_Block_List[i][j].borders;
 
-
-            glLineWidth(3.0f);
             glColor3f(1.0f, 0.0f, 0.0f);
 
-            glBegin(GL_LINES); 
             if(borders->left != 0.0f)
-            {              
-	        glVertex2f(pointX + borders->left/width, pointY);  glVertex2f(pointX + borders->left/width, pointY + block_height); 
+            {
+              glRectf(pointX + borders->left*100/width, pointY, pointX + block_width, pointY + block_height);
             }
             else if(borders->right != 0.0f) 
             {
-	        glVertex2f(pointX + (BLOCK_SIZE-borders->right)/width, pointY);  glVertex2f(pointX + (BLOCK_SIZE-borders->right)/width, pointY + block_height); 
+              glRectf(pointX , pointY, pointX + (DEFAULT_BLOCK_LENGTH-borders->right)*100/width, pointY + block_height);
             }
-            if(borders->up != 0.0f)
+            else if(borders->up != 0.0f) 
             {
-	        glVertex2f(pointX, pointY + (BLOCK_SIZE-borders->up)/height);  glVertex2f(pointX + block_width, pointY+ (BLOCK_SIZE-borders->up)/height); 
+              glRectf(pointX, pointY, pointX + block_width, pointY + (DEFAULT_BLOCK_LENGTH-borders->up)*100/height);
             }
             else if(borders->down != 0.0f) 
             {
-	        glVertex2f(pointX, pointY + borders->down/height);  glVertex2f(pointX + block_width, pointY + borders->down/height); 
+              glRectf(pointX , pointY + borders->down*100/height , pointX + block_width, pointY + block_width);
             }
-            glEnd();
+
+//////dock
+          if(Global_Block_List[i][j].getMark() == DOCK)
+          {
+            Borders* borders = Global_Block_List[i][j].borders;
+
+            glColor3f(0.0f, 1.0f, 0.0f);
+            if(borders == NULL) 
+            {
+               glRectf(pointX, pointY, pointX + block_width, pointY + block_height);
+            } 
+            else 
+            {
+              if(borders->left != 0.0f)
+              {
+                glRectf(pointX + borders->left*100/width, pointY, pointX + block_width, pointY + block_height);
+              }
+              else if(borders->right != 0.0f) 
+              {
+                glRectf(pointX , pointY, pointX + (DEFAULT_BLOCK_LENGTH-borders->right)*100/width, pointY + block_height);
+              }
+              else if(borders->up != 0.0f) 
+              {
+                glRectf(pointX, pointY, pointX + block_width, pointY + (DEFAULT_BLOCK_LENGTH-borders->up)*100/height);
+              }
+              else if(borders->down != 0.0f) 
+              {
+                glRectf(pointX , pointY + borders->down*100/height , pointX + block_width, pointY + block_width);
+              }
+            }
           }
-*/
       }
     }
 
 
-//////////make wall start////////////
+/*//////////make wall start////////////
 
     printf("Make wall start!\n");
 
     float wallPointX = -1.0f;
     float wallPointY = -1.0f;
 
+    glLineWidth(3.0f);
+    glColor3f(1.0f, 0.0f, 0.0f);
+    glBegin(GL_LINES); 
           for(int i = 0; i < Global_Wall_List.size(); i++)
           {
             Borders* borders = Global_Wall_List[i].borders;
 
-            float blockX = -1.0f + (Global_Wall_List[i].getCenterPoint().getCoordinateX() + DEFAULT_BLOCK_LENGTH) *100.f/width ;
-            float blockY = -1.0f + (Global_Wall_List[i].getCenterPoint().getCoordinateY() + DEFAULT_BLOCK_LENGTH) *100.f/height ;
+            float blockX = -1.0f + (Global_Wall_List[i].getCenterPoint().getCoordinateX() + DEFAULT_BLOCK_LENGTH) *100/width ;
+            float blockY = -1.0f + (Global_Wall_List[i].getCenterPoint().getCoordinateY() + DEFAULT_BLOCK_LENGTH) *100/height ;
 
-
-            glLineWidth(3.0f);
-            glColor3f(1.0f, 0.0f, 0.0f);
-
-            glBegin(GL_LINES); 
             if(borders->left != 0.0f)
             {
                 printf("wallPointX,Y:[%f , %f]\n",wallPointX, wallPointY);
@@ -219,28 +243,30 @@
             }
             else if(borders->right != 0.0f) 
             {
+                printf("wallPointX,Y:[%f , %f]\n",wallPointX, wallPointY);
                 glVertex2f(wallPointX, wallPointY);  glVertex2f(blockX + (DEFAULT_BLOCK_LENGTH-borders->right)*100/width, blockY + block_height/2); 
                 wallPointX = blockX + (DEFAULT_BLOCK_LENGTH-borders->right)*100/width;
                 wallPointY = blockY + block_height/2;
             }
-            if(borders->up != 0.0f)
+            else if(borders->up != 0.0f)
             {
+                printf("wallPointX,Y:[%f , %f]\n",wallPointX, wallPointY);
                 glVertex2f(wallPointX, wallPointY);  glVertex2f(blockX + block_width/2, blockY+ (DEFAULT_BLOCK_LENGTH-borders->up)*100/height); 
                 wallPointX = wallPointX + block_width/2;
-                wallPointY = wallPointY+ (DEFAULT_BLOCK_LENGTH-borders->up)*100/height;
+                wallPointY = wallPointY + (DEFAULT_BLOCK_LENGTH-borders->up)*100/height;
             }
             else if(borders->down != 0.0f) 
             {
+                printf("wallPointX,Y:[%f , %f]\n",wallPointX, wallPointY);
                 glVertex2f(wallPointX, wallPointY);  glVertex2f(blockX + block_width/2, blockY + borders->down*100/height); 
                 wallPointX = blockX + block_width/2;
                 wallPointY = blockY + borders->down*100/height;
             }
-            glEnd();
           }
-
+     glEnd();
     printf("Make wall end!\n");
 ///////make wall over////////
-
+*/
 
     glFlush();
     glutSwapBuffers();
