@@ -191,7 +191,7 @@
 
 
 
-//////////make wall start////////////
+/*//////////make wall start////////////
 
     float wallPointX = 0.0f;
     float wallPointY = 0.0f;
@@ -232,7 +232,7 @@
             glEnd();
           }
 
-//////make wall over////////
+*////////make wall over////////
 
 
     glFlush();
