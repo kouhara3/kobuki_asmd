@@ -454,7 +454,8 @@ public:
     this->next_block->setMark(OBSTACLE);
     double movement = getMovement( this->next_block );
     Direction direction = getDirection();
-    direction = updateDirection( direction );
+    Direction new_direction = updateDirection( direction );
+    if( direction != new_direction ) movement = 0.10;
     setObstacleSize( this->next_block, movement, direction );
   }
 
