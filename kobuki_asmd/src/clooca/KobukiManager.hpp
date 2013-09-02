@@ -223,7 +223,7 @@ public:
       }
 
       double spd_down_erea = rundata.dx_goal / 4;
-      double default_speed = 0.05;
+      double default_speed = 0.08;
 
       double acc;
       if( abs_dx < spd_down_erea ) acc = abs_dx / spd_down_erea;
@@ -249,7 +249,7 @@ public:
       }
 
       double spd_down_erea = rundata.dth_goal / 4;
-      double default_speed = 0.2;
+      double default_speed = 0.4;
 
       double acc;
       if( abs_dth < spd_down_erea ) acc = abs_dth / spd_down_erea;

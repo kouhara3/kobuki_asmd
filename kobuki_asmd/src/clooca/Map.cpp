@@ -220,7 +220,9 @@ public:
     int j = 0;
     while(this->block_list[0][j].getMark() != OBSTACLE){
         j++;
+        if( this->block_list[0].size() <= j ) break;
     }
+    if( this->block_list[0].size() <= j ) return;
 
     std::cout << "first obstacle: 0," << j << std::endl;
     setWall(&this->block_list[0][j]);
