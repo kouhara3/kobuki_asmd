@@ -75,8 +75,7 @@ int main() {
   while( true ){
     //kobuki_manager.spin();
     sleep();
- //   event_manager.checkEvent( kobuki_manager.getSensorData() , kobuki_manager.getIRData() );
-	kobuki_manager.IRsensor.showMe();
+    event_manager.checkEvent( kobuki_manager.getSensorData() , kobuki_manager.getIRData() );
   }
   return 0;
 }
