@@ -3,32 +3,14 @@
 class STMEventManager{
 public:
   enum Event{
-/*    LEFT_BUMPER_PRESSED,
-    LEFT_BUMPER_RELEASED,
-    CENTER_BUMPER_PRESSED,
-    CENTER_BUMPER_RELEASED,
-    RIGHT_BUMPER_PRESSED,
-    CENTER_BUMPER_RELEASED,
-    LEFT_FAR_IR_FOUND,
-    LEFT_FAR_IR_MISSED,
-    LEFT_NEAR_IR_FOUND,
-    LEFT_NEAR_IR_MISSED,
-    CENTER_FAR_IR_FOUND,
-    CENTER_FAR_IR_MISSED,
-    CENTER_NEAR_IR_FOUND,
-    CENTER_NEAR_IR_MISSED,
-    RIGHT_FAR_IR_FOUND,
-    RIGHT_FAR_IR_MISSED,
-    RIGHT_NEAR_IR_FOUND,
-    RIGHT_NEAR_IR_MISSED,
-*/
     BUMPER_PRESSED = 5,
     BUMPER_RELEASED = -1,
     IR_FOUND = -1,
     IR_MISSED = -1,
     RUN_REACHED = 4,
     TURN_REACHED = 3,
-    BUTTON_PUSHED = 0
+    BUTTON_PUSHED = 0,
+    WHEEL_DROP = 6
   };
 
   STMEventManager(){
@@ -66,6 +48,15 @@ public:
       if( signal ) stm.sendEvent( BUTTON_PUSHED );
     }
     last_button_signal = signal;  // update signal 
+
+    /* check wheel_drop */
+    signal = 0x00;    // check signal
+    if( new_sensor.right_drop ) signal = 0x01;
+    if( new_sensor.left_drop )  signal = 0x01;
+    if( signal ^ last_drop_signal ){
+      if( signal ) stm.sendEvent( WHEEL_DROP );
+    }
+    last_drop_signal = signal;  // update signal 
 
     /* check IR */
     signal = 0x00;    // check signal
@@ -105,6 +96,7 @@ public:
 private:
 
   unsigned char last_bumper_signal;
+  unsigned char last_drop_signal;
   unsigned char last_ir_signal;
   unsigned char last_button_signal;
   KobukiManager::State last_run_state;

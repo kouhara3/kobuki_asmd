@@ -236,13 +236,13 @@ public:
 	int tag_x = wall_block->getTagX();
 	int tag_y = wall_block->getTagY();
 
-	if(!(tag_x > 0 && tag_y == 0))
+	//if(!(tag_x > 0 && tag_y == 0))
 	{
 		wall_block->setMark(WALL);
                 std::cout << "checked: " << tag_x << "," << tag_y << std::endl;
 
-                //Block temp_block = &wall_block;
-                //wall_list.push_back(temp_block);
+                Block temp_block = *wall_block;
+                wall_list.push_back(temp_block);
 
 		for(int i = tag_x -1; i<= tag_x + 1; i++)
 		{
@@ -257,11 +257,14 @@ public:
 			}
 		}
 	} 
-	else 
+	/*else 
 	{
 		wall_block->setMark(WALL);
     std::cout << "last: " << tag_x << "," << tag_y << std::endl;
+    Block temp_block = *wall_block;
+    wall_list.push_back(temp_block);
 	}
+  */
   std::cout << "finish" << std::endl;
       return;
   }
@@ -564,6 +567,37 @@ public:
     return;
   }
 
+  void markDockBlock( Block* dock ){
+    std::queue<Block*> qu_dock;
+
+    dock->setMark( DOCK );
+    qu_dock.push( dock );
+
+    while( !qu_dock.empty() ){
+      Block* tmp = qu_dock.front();
+      qu_dock.pop();
+
+      int x = tmp->getTagX();
+      int y = tmp->getTagY();
+      int max_x = this->block_list.size()-1;
+      int max_y = this->block_list[x].size()-1;
+        
+      for( int i = x-1; i <= x+1; i++ ){
+        if( (i < 0) || (i > max_x) ) continue;
+
+        for( int j = y-1; j <= y+1; j++ ){
+          if( (j < 0) || (j > max_y) ) continue;
+
+          if( this->block_list[i][j].getMark() == OBSTACLE ){
+            tmp->setMark( DOCK );
+            q.push( &this->block_list[i][j] );
+          }
+        }
+      }
+    }
+    return;
+  }
+  
   //
   void searchObstacleBlocks(){
     for( unsigned int i = 0; i < this->block_list.size(); i++ ){

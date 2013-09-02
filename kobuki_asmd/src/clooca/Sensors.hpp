@@ -12,7 +12,17 @@ public:
     char right_bumper;
     char charger;
     char button;
-    Data(){ left_bumper=0; center_bumper=0; right_bumper=0; charger=0; button=0;}
+    char left_drop;
+    char right_drop;
+    
+    Data(){
+      left_bumper=0;
+      center_bumper=0;
+      right_bumper=0;
+      charger=0;
+      button=0;
+      left_drop=0;
+      right_drop=0;}
   };
 
   void update( kobuki::CoreSensors::Data& new_data ){
@@ -54,6 +64,25 @@ public:
         data.button = 1;
       } else {
         data.button = 0;
+      }
+    }
+
+    // check wheel drop
+    if( new_data.wheel_drop ^ last_data.wheel_drop ){
+        // Check changes in each wheel_drop sensor state's and raise an event if so
+      if ((new_data.wheel_drop ^ last_data.wheel_drop) & CoreSensors::Flags::LeftWheel) {
+        if (new_data.wheel_drop & CoreSensors::Flags::LeftWheel) {
+          data.left_drop = 1;
+        } else {
+          data.left_drop = 0;
+        }
+      }  
+      if ((new_data.wheel_drop ^ last_data.wheel_drop) & CoreSensors::Flags::RightWheel) {
+        if (new_data.wheel_drop & CoreSensors::Flags::RightWheel) {
+          data.right_drop = 1;
+        } else {
+          data.right_drop = 0;
+        }
       }
     }
 

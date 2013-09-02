@@ -8,7 +8,7 @@
 
 /* Event ID Definitions */
 
-#define KobukiStateMachine_EVENT_BUTTON_PUSHED 0
+#define KobukiStateMachine_EVENT_BUTTON_PRESSED 0
 
 #define KobukiStateMachine_EVENT_NEXT 1
 
@@ -20,7 +20,9 @@
 
 #define KobukiStateMachine_EVENT_BUMPER_PRESSED 5
 
-#define KobukiStateMachine_EVENT_IGNORE 6
+#define KobukiStateMachine_EVENT_WHEEL_DROP 6
+
+#define KobukiStateMachine_EVENT_IGNORE 7
 
 
 
@@ -83,6 +85,7 @@ public:
 
   void saveMap() {
       map.showIR();
+      map.showMe();
     goFinish();
   }
 
@@ -149,8 +152,8 @@ public:
   }
 
   void initializeMap() {
-      map.checkWall();
-//    map.searchObstacleBlocks();
+    map.checkWall();
+//  map.searchObstacleBlocks();
     goNext();
   }
 

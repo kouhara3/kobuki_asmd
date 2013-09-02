@@ -248,7 +248,7 @@ public:
         return;
       }
 
-      double spd_down_erea = rundata.dth_goal / 4;
+      /*double spd_down_erea = rundata.dth_goal / 4;
       double default_speed = 0.4;
 
       double acc;
@@ -260,7 +260,7 @@ public:
       if( rundata.dirct_speed > 0 ) new_spd = default_speed + (rundata.dirct_speed - default_speed ) * acc;
       else new_spd = -(default_speed + (-rundata.dirct_speed - default_speed ) * acc);
       changeTurnSpeed( new_spd );
-
+      */
     }
     return;
   }
