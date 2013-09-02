@@ -326,9 +326,47 @@ public:
     if( (angle <= -45) && ( angle > -135 ) ) return(DOWN);   // down
   }
 
+  Direction updateDirection( Direction direct ){
+    kobuki::SensorManager::Data sensor = getSensorData();
+
+    if( sensor.left_bumper )
+    {
+      switch( direct ){
+      case RIGHT:
+        return(UP);
+      case UP:
+        return(LEFT);
+      case LEFT:
+        return(DOWN);
+      case DOWN:
+        return(RIGHT);
+      default:
+        break;
+      }
+    } else if( sensor.right_bumper )
+    {
+      switch( direct ){
+      case RIGHT:
+        return(DOWN);
+      case UP:
+        return(RIGHT);
+      case LEFT:
+        return(UP);
+      case DOWN:
+        return(LEFT);
+      default:
+        break;
+      }
+    } else{
+      return( direct );
+    }
+  }
+  
+
   void setObstacleSize( Block *block, double move, Direction direct ){
-    // if block has not obstacle object, then create obstacle. 
+    // if block has not obstacle object, then create obstacle.
     if( block->borders == NULL ) block->borders = new Borders;
+
     switch( direct ){
       case RIGHT:
         block->borders->left = move;
@@ -416,6 +454,7 @@ public:
     this->next_block->setMark(OBSTACLE);
     double movement = getMovement( this->next_block );
     Direction direction = getDirection();
+    direction = updateDirection( direction );
     setObstacleSize( this->next_block, movement, direction );
   }
 
