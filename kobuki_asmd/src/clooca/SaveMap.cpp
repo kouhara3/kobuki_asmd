@@ -126,8 +126,8 @@
           glLineWidth(1.0f);
           glColor3f(0.9f, 0.9f, 0.9f);
 
-	  glBegin(GL_LINES); 
-	    glVertex2f(pointX, pointY);                                 glVertex2f(pointX + block_width, pointY); 
+          glBegin(GL_LINES); 
+          glVertex2f(pointX, pointY);                                   glVertex2f(pointX + block_width, pointY); 
             glVertex2f(pointX + block_width, pointY);                   glVertex2f(pointX + block_width, pointY + block_height); 
             glVertex2f(pointX + block_width, pointY + block_height);    glVertex2f(pointX, pointY + block_height); 
             glVertex2f(pointX, pointY + block_height);                  glVertex2f(pointX, pointY);
@@ -182,7 +182,7 @@
             {
               glRectf(pointX , pointY + borders->down*100/height , pointX + block_width, pointY + block_width);
             }
-
+          }
 //////dock
           if(Global_Block_List[i][j].getMark() == DOCK)
           {

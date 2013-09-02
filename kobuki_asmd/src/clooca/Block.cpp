@@ -25,6 +25,7 @@ enum Mark
          BLANK,
          OBSTACLE,
 	 WALL,
+   DOCK,
          SUR_BLANK,
          SUR_OBSTACLE
 };

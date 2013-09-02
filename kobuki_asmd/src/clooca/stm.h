@@ -98,7 +98,9 @@ public:
   }
 
   void docking() {
-      map.docking();
+    map.docking();
+    map.markDockBlock( map.findDockBlock() );
+    map.Wait( 4.0 );
     visit_dock++;
     goNext();
   }

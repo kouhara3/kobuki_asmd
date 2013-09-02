@@ -9,6 +9,7 @@
 *****************************************************************************/
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 #include <iostream>
 #include <math.h>
 #include <vector>
@@ -220,28 +221,28 @@ public:
     for(int i = 0; i<this->block_list.size();i++)
     {
       int j = 0;
-      while(this->block_list[i][j] != OBSTACLE && this->block_list[i][j] != WALL) j++;
+      while(this->block_list[i][j].getMark() != OBSTACLE && this->block_list[i][j].getMark() != WALL) j++;
       this->block_list[i][j].setMark(WALL);
     }
 
     for(int j = 0; j<this->block_list[0].size();j++)
     {
       int i = this->block_list.size();
-      while(this->block_list[i][j] != OBSTACLE && this->block_list[i][j] != WALL) i--;
+      while(this->block_list[i][j].getMark() != OBSTACLE && this->block_list[i][j].getMark() != WALL) i--;
       this->block_list[i][j].setMark(WALL);
     }
 
     for(int i = this->block_list.size(); i>0; i--)
     {
       int j = this->block_list[0].size();
-      while(this->block_list[i][j] != OBSTACLE && this->block_list[i][j] != WALL) j--;
+      while(this->block_list[i][j].getMark() != OBSTACLE && this->block_list[i][j].getMark() != WALL) j--;
       this->block_list[i][j].setMark(WALL);
     }
 
     for(int j = this->block_list[0].size(); j>0; j--)
     {
       int i = 0;
-      while(this->block_list[i][j] != OBSTACLE && this->block_list[i][j] != WALL) i++;
+      while(this->block_list[i][j].getMark() != OBSTACLE && this->block_list[i][j].getMark() != WALL) i++;
       this->block_list[i][j].setMark(WALL);
     }
 /*
@@ -300,9 +301,12 @@ public:
   
   Block* findDockBlock()
   {
-    float x = this->manager.pose.x();
-    float y = this->manager.pose.y();
-    float angle = this->manager.pose.heading();
+    ecl::Pose2D<double> pose;
+    pose = this->manager.getPose();
+
+    float x = pose.x();
+    float y = pose.y();
+    float angle = pose.heading();
     
     float dockX = x + cos(angle);
     float dockY = y + sin(angle);
@@ -611,6 +615,18 @@ public:
     return;
   }
 
+  void Wait( double t ){
+    time_t start;
+    time_t now;
+
+    time(&start);
+    time(&now);
+    while( (now-start) < t ){
+      time(&now);
+    }
+    return;
+  }
+
   void markDockBlock( Block* dock ){
     std::queue<Block*> qu_dock;
 
@@ -634,7 +650,7 @@ public:
 
           if( this->block_list[i][j].getMark() == OBSTACLE ){
             tmp->setMark( DOCK );
-            q.push( &this->block_list[i][j] );
+            qu_dock.push( &this->block_list[i][j] );
           }
         }
       }
