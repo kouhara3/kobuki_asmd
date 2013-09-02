@@ -295,6 +295,21 @@ public:
       return;
   }
   
+  Block* findDockBlock()
+  {
+    float x = this->manager.pose.x();
+    float y = this->manager.pose.y();
+    float angle = this->manager.pose.heading();
+    
+    float dockX = x + cos(angle);
+    float dockY = y + sin(angle);
+
+    int tagX = (int)(dockX/DEFAULT_BLOCK_LENGTH) + 1 ;
+    int tagY = (int)(dockY/DEFAULT_BLOCK_LENGTH) + 1 ;
+    
+    return &this->block_list[tagX][tagY];
+  }
+
 /*  ////////////////////////////////////
   void outputBlockList(){
     Global_Block_List = this->block_list;

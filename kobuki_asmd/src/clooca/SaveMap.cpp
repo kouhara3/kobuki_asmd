@@ -124,7 +124,7 @@
           glEnable(GL_LINE_STIPPLE);
           glLineStipple(2, 0x0F0F);
           glLineWidth(1.0f);
-          glColor3f(0.97f, 0.97f, 0.97f);
+          glColor3f(0.9f, 0.9f, 0.9f);
 
 	  glBegin(GL_LINES); 
 	    glVertex2f(pointX, pointY);                                 glVertex2f(pointX + block_width, pointY); 
@@ -134,7 +134,7 @@
           glEnd();
           
           glDisable(GL_LINE_STIPPLE);
-          
+/////obstacle
           if(Global_Block_List[i][j].getMark() == OBSTACLE )
           {
             Borders* borders = Global_Block_List[i][j].borders;
@@ -159,6 +159,7 @@
             }
           }
 
+//////wall
           if(Global_Block_List[i][j].getMark() == WALL)
           {
             Borders* borders = Global_Block_List[i][j].borders;
@@ -180,6 +181,36 @@
             else if(borders->down != 0.0f) 
             {
               glRectf(pointX , pointY + borders->down*100/height , pointX + block_width, pointY + block_width);
+            }
+
+//////dock
+          if(Global_Block_List[i][j].getMark() == DOCK)
+          {
+            Borders* borders = Global_Block_List[i][j].borders;
+
+            glColor3f(0.0f, 1.0f, 0.0f);
+            if(borders == NULL) 
+            {
+               glRectf(pointX, pointY, pointX + block_width, pointY + block_height);
+            } 
+            else 
+            {
+              if(borders->left != 0.0f)
+              {
+                glRectf(pointX + borders->left*100/width, pointY, pointX + block_width, pointY + block_height);
+              }
+              else if(borders->right != 0.0f) 
+              {
+                glRectf(pointX , pointY, pointX + (DEFAULT_BLOCK_LENGTH-borders->right)*100/width, pointY + block_height);
+              }
+              else if(borders->up != 0.0f) 
+              {
+                glRectf(pointX, pointY, pointX + block_width, pointY + (DEFAULT_BLOCK_LENGTH-borders->up)*100/height);
+              }
+              else if(borders->down != 0.0f) 
+              {
+                glRectf(pointX , pointY + borders->down*100/height , pointX + block_width, pointY + block_width);
+              }
             }
           }
       }
