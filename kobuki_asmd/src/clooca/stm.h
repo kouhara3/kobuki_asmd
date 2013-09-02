@@ -54,7 +54,7 @@ public:
   void action(int state);
 
   void init() {
-      map.resize(5.2, 8.0);
+      map.resize(8.0, 8.0);
     visit_dock = 0;
     endflg = false;
   }
@@ -82,13 +82,16 @@ public:
   }
 
   void saveMap() {
-      map.showMe();
+      map.showIR();
     goFinish();
   }
 
   void setNextIRBlock() {
       if( map.setNextIRBlock() ) goNext();
-    else goFinish();
+    else{
+      std::cout<<"IRBlock not found"<<std::endl;
+      goFinish();
+    }
   }
 
   void docking() {
