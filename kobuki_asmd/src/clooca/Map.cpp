@@ -216,7 +216,35 @@ public:
   }
   
   void checkWall(){
+    
+    for(int i = 0; i<this->block_list.size();i++)
+    {
+      int j = 0;
+      while(this->block_list[i][j] != OBSTACLE && this->block_list[i][j] != WALL) j++;
+      this->block_list[i][j].setMark(WALL);
+    }
 
+    for(int j = 0; j<this->block_list[0].size();j++)
+    {
+      int i = this->block_list.size();
+      while(this->block_list[i][j] != OBSTACLE && this->block_list[i][j] != WALL) i--;
+      this->block_list[i][j].setMark(WALL);
+    }
+
+    for(int i = this->block_list.size(); i>0; i--)
+    {
+      int j = this->block_list[0].size();
+      while(this->block_list[i][j] != OBSTACLE && this->block_list[i][j] != WALL) j--;
+      this->block_list[i][j].setMark(WALL);
+    }
+
+    for(int j = this->block_list[0].size(); j>0; j--)
+    {
+      int i = 0;
+      while(this->block_list[i][j] != OBSTACLE && this->block_list[i][j] != WALL) i++;
+      this->block_list[i][j].setMark(WALL);
+    }
+/*
     int j = 0;
     while(this->block_list[0][j].getMark() != OBSTACLE){
         j++;
@@ -226,6 +254,7 @@ public:
 
     std::cout << "first obstacle: 0," << j << std::endl;
     setWall(&this->block_list[0][j]);
+*/
   }
 
   void setWall(Block* wall_block){
@@ -241,8 +270,8 @@ public:
 		wall_block->setMark(WALL);
                 std::cout << "checked: " << tag_x << "," << tag_y << std::endl;
 
-                //Block temp_block = &wall_block;
-                //wall_list.push_back(temp_block);
+                Block temp_block = &wall_block;
+                wall_list.push_back(temp_block);
 
 		for(int i = tag_x -1; i<= tag_x + 1; i++)
 		{
