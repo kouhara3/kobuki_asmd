@@ -86,6 +86,7 @@ int main (int argc, char *argv[])
   }
   
   outputBlockList( stm.map );
+  outputWallList( stm.map );
   outputMax( stm.map );
   showMap(argc, argv);
 

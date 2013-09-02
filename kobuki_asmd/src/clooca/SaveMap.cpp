@@ -267,6 +267,11 @@
     return;
   }
 
+void outputWallList( Map& map ){
+    Global_Wall_List = map.getWallList();
+    return;
+  }
+
   void outputMax( Map& map ){
     Global_Max = map.getMax();
     return;
