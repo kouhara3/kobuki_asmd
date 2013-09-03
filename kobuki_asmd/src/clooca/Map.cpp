@@ -217,7 +217,7 @@ public:
   }
   
   void checkWall(){
- /*   
+   
     for(int i = 0; i<this->block_list.size();i++)
     {
       int j = 0;
@@ -229,24 +229,24 @@ public:
     {
       int i = this->block_list.size()-1;
       for(; 0<=i; i--) if(this->block_list[i][j].getMark() == OBSTACLE || this->block_list[i][j].getMark() == WALL) break;
-      if( i <= 0 ) this->block_list[i][j].setMark(WALL);
+      if( 0 <= i ) this->block_list[i][j].setMark(WALL);
     }
 
-    for(int i = this->block_list.size()-1; i>0; i--)
+    for(int i = this->block_list.size()-1; i>=0; i--)
     {
-      int j = this->block_list[0].size()-1;
+      int j = this->block_list[i].size()-1;
       for(; 0<=j; j--) if(this->block_list[i][j].getMark() == OBSTACLE || this->block_list[i][j].getMark() == WALL) break;
-      if( 0<=j ) this->block_list[i][j].setMark(WALL);
+      if( 0 <= j ) this->block_list[i][j].setMark(WALL);
     }
 
-    for(int j = this->block_list[0].size()-1; j>0; j--)
+    for(int j = this->block_list[0].size()-1; j>=0; j--)
     {
       int i = 0;
       for(; i<this->block_list.size(); i++) if(this->block_list[i][j].getMark() == OBSTACLE || this->block_list[i][j].getMark() == WALL) break;
       if( i < this->block_list.size() ) this->block_list[i][j].setMark(WALL);
     }
-*/    
 
+/*
     int j = 0;
     while(this->block_list[0][j].getMark() != OBSTACLE){
         j++;
@@ -256,7 +256,7 @@ public:
 
     std::cout << "first obstacle: 0," << j << std::endl;
     setWall(&this->block_list[0][j]);
-
+*/
   }
 
   void setWall(Block* wall_block){
