@@ -7,10 +7,14 @@
 /*****************************************************************************
 ** Includes
 *****************************************************************************/
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
 #include <iostream>
 #include <math.h>
 #include <vector>
 #include <queue>
+#include <GL/glut.h>
 #include "Coordinate.cpp"
 #include "KobukiManager.hpp"
 #include "Block.cpp"
@@ -18,8 +22,9 @@
 /*****************************************************************************
 ** Define
 *****************************************************************************/
-#define MINIMUM_SIZE 0.5
+#define MINIMUM_SIZE 0.4
 #define KOBUKI_SIZE 0.35
+
 /*****************************************************************************
 ** Classes
 *****************************************************************************/
@@ -54,6 +59,7 @@ public:
     
     int idx_x = this->max.getCoordinateX()/DEFAULT_BLOCK_LENGTH;
     int idx_y = this->max.getCoordinateY()/DEFAULT_BLOCK_LENGTH;
+
     std::cout << "idx_x = " << idx_x << std::endl; 
     std::cout << "idx_y = " << idx_y << std::endl;
    
@@ -65,7 +71,7 @@ public:
       
         for(int j = 0; j<idx_y; j++) {
           Coordinate coord;
-          coord.setCoordinate(i*DEFAULT_BLOCK_LENGTH, j*(DEFAULT_BLOCK_LENGTH-0.04));
+          coord.setCoordinate(i*DEFAULT_BLOCK_LENGTH-0.4f, j*DEFAULT_BLOCK_LENGTH-0.4f);
           Block block(coord, DEFAULT_BLOCK_LENGTH, i, j);
   	  list.push_back(block);
         }
@@ -82,14 +88,18 @@ public:
         }
       }
 
-      this->current_block = (Block*) &block_list[0][0];
-      block_list[0][0].setMark(BLANK);
-      block_list[0][0].setHasKobuki(true);
+      this->current_block = (Block*) &block_list[1][1];
+      this->next_block = this->current_block;
+
+      //block_list[1][1].setMark(BLANK);
+      //block_list[1][1].setHasKobuki(true);
+
       std::cout << "Block list initialezed successfully." << std::endl;
       std::cout << "Size of block_list is [" << this->block_list.size() <<"]" << std::endl;
       return true;
     } else {
       this->current_block = NULL;
+      this->next_block = this->current_block;
       std::cout << "Block list initialeze failed." << std::endl;
       return false;
     }
@@ -152,7 +162,7 @@ public:
 
     double turn_angle = (atan2(dist_y,dist_x)/ecl::pi)*180 - angle_now;
 
-    if((turn_angle < 5.0) && (turn_angle > -5.0)) turn_angle = 0;
+    //if((turn_angle < 5.0) && (turn_angle > -5.0)) turn_angle = 0;
     if(turn_angle>180.0) turn_angle = turn_angle - 360.0;
     if(turn_angle<-180.0) turn_angle = turn_angle + 360.0;
     //std::cout << "angle: " << angle_now << std::endl;
@@ -206,31 +216,69 @@ public:
     return &(this->manager);
   }
   
-    void checkWall(){
+  void checkWall(){
+   
+    for(int i = 0; i<this->block_list.size();i++)
+    {
+      int j = 0;
+      for(; j<this->block_list[i].size(); j++) if(this->block_list[i][j].getMark() == OBSTACLE || this->block_list[i][j].getMark() == WALL) break;
+      if( j < this->block_list[i].size() ) this->block_list[i][j].setMark(WALL);
+    }
 
+    for(int j = 0; j<this->block_list[0].size();j++)
+    {
+      int i = this->block_list.size()-1;
+      for(; 0<=i; i--) if(this->block_list[i][j].getMark() == OBSTACLE || this->block_list[i][j].getMark() == WALL) break;
+      if( 0 <= i ) this->block_list[i][j].setMark(WALL);
+    }
+
+    for(int i = this->block_list.size()-1; i>=0; i--)
+    {
+      int j = this->block_list[i].size()-1;
+      for(; 0<=j; j--) if(this->block_list[i][j].getMark() == OBSTACLE || this->block_list[i][j].getMark() == WALL) break;
+      if( 0 <= j ) this->block_list[i][j].setMark(WALL);
+    }
+
+    for(int j = this->block_list[0].size()-1; j>=0; j--)
+    {
+      int i = 0;
+      for(; i<this->block_list.size(); i++) if(this->block_list[i][j].getMark() == OBSTACLE || this->block_list[i][j].getMark() == WALL) break;
+      if( i < this->block_list.size() ) this->block_list[i][j].setMark(WALL);
+    }
+
+/*
     int j = 0;
     while(this->block_list[0][j].getMark() != OBSTACLE){
         j++;
+        if( this->block_list[0].size() <= j ) break;
     }
+    if( this->block_list[0].size() <= j ) return;
 
+    std::cout << "first obstacle: 0," << j << std::endl;
     setWall(&this->block_list[0][j]);
+*/
   }
 
   void setWall(Block* wall_block){
 
   	int idx_x = this->block_list.size();
 	int idx_y = this->block_list[0].size();
-	int tag_x = wall_block->getTagX();
-	int tag_y = wall_block->getTagX();
 
-	if(!(tag_x > 0 && tag_y == 0))
+	int tag_x = wall_block->getTagX();
+	int tag_y = wall_block->getTagY();
+
+	//if(!(tag_x > 0 && tag_y == 0))
 	{
 		wall_block->setMark(WALL);
+    std::cout << "checked: " << tag_x << "," << tag_y << std::endl;
+
+                Block temp_block = *wall_block;
+                wall_list.push_back(temp_block);
 
 		for(int i = tag_x -1; i<= tag_x + 1; i++)
 		{
 			if(i == -1) i = 0;
-			for(int j = tag_y -1; i<= tag_y + 1; j++)
+			for(int j = tag_y -1; j<= tag_y + 1; j++)
 			{
 				if(j == -1) j = 0;
 				if(this->block_list[i][j].getMark() == OBSTACLE)
@@ -240,53 +288,60 @@ public:
 			}
 		}
 	} 
-	else 
+	/*else 
 	{
 		wall_block->setMark(WALL);
+    std::cout << "last: " << tag_x << "," << tag_y << std::endl;
+    Block temp_block = *wall_block;
+    wall_list.push_back(temp_block);
 	}
+  */
+  std::cout << "finish" << std::endl;
       return;
   }
+  
+  Block* findDockBlock()
+  {
+    ecl::Pose2D<double> pose;
+    pose = this->manager.getPose();
 
-  void showMap(){
-    int idx_x = this->block_list.size();
-    int idx_y = this->block_list[0].size();
-    std::cout << "=====Show now map construct !=====" << std::endl << std::endl;
-    for(int i = idx_y-1; i>-1; i--){
-      for(int j = 0; j<idx_x ; j++){
-        switch(block_list[j][i].getMark()){
-          case UNKNOWN: std::cout << "? ";	break;
+    float x = pose.x();
+    float y = pose.y();
+    float angle = pose.heading();
+    
+    float dockX = x + cos(angle);
+    float dockY = y + sin(angle);
 
-          case BLANK:	std::cout << "O ";	break;
+    int tagX = (int)(dockX/DEFAULT_BLOCK_LENGTH) + 1 ;
+    int tagY = (int)(dockY/DEFAULT_BLOCK_LENGTH) + 1 ;
+    
+    return &this->block_list[tagX][tagY];
+  }
 
-          case OBSTACLE:std::cout << "X ";	break;
-        }
-      }
-      std::cout << std::endl;
-    }
-    std::cout << "==================================" << std::endl << std::endl;
+/*  ////////////////////////////////////
+  void outputBlockList(){
+    Global_Block_List = this->block_list;
     return;
   }
 
-  void showMap(){
-    int idx_x = this->block_list.size();
-    int idx_y = this->block_list[0].size();
-    std::cout << "=====Show now map construct !=====" << std::endl << std::endl;
-    for(int i = idx_y-1; i>-1; i--){
-      for(int j = 0; j<idx_x ; j++){
-        switch(block_list[j][i].getMark()){
-          case UNKNOWN: std::cout << "? ";	break;
-
-          case BLANK:	std::cout << "O ";	break;
-
-          case OBSTACLE:std::cout << "X ";	break;
-        }
-      }
-      std::cout << std::endl;
-    }
-    std::cout << "==================================" << std::endl << std::endl;
+  void outputMax(){
+    Global_Max = this->max;
     return;
   }
+*/
+  std::vector< std::vector<Block> > getBlockList(){
+    return( this->block_list );
+  }
 
+  std::vector<Block> getWallList(){
+    return( this->wall_list );
+  }
+
+  Coordinate getMax(){
+    return( this->max );
+  }
+
+  /////////////////////////////////////
 // method for queue
 
   void pushPath( std::vector<Block *> list ){
@@ -310,9 +365,10 @@ public:
 // private functions
 
   double getMovement( Block *block ){
-    double move = getNextDistance( block );
-    move += ( KOBUKI_SIZE / 2 ) - ( block->getSideLength() / 2 );
-    return move;
+    double distance = getNextDistance( block );
+    double border = block->getSideLength() - distance;
+    if( border < 0.0 ) border = 0.0;
+    return border;
   }
 
   Direction getDirection(){
@@ -324,21 +380,63 @@ public:
     if( (angle <= -45) && ( angle > -135 ) ) return(DOWN);   // down
   }
 
+  Direction updateDirection( Direction direct ){
+    kobuki::SensorManager::Data sensor = getSensorData();
+
+    if( sensor.left_bumper )
+    {
+      switch( direct ){
+      case RIGHT:
+        return(UP);
+      case UP:
+        return(LEFT);
+      case LEFT:
+        return(DOWN);
+      case DOWN:
+        return(RIGHT);
+      default:
+        break;
+      }
+    } else if( sensor.right_bumper )
+    {
+      switch( direct ){
+      case RIGHT:
+        return(DOWN);
+      case UP:
+        return(RIGHT);
+      case LEFT:
+        return(UP);
+      case DOWN:
+        return(LEFT);
+      default:
+        break;
+      }
+    } else{
+      return( direct );
+    }
+  }
+  
+
   void setObstacleSize( Block *block, double move, Direction direct ){
-    // if block has not obstacle object, then create obstacle. 
+    // if block has not obstacle object, then create obstacle.
     if( block->borders == NULL ) block->borders = new Borders;
+
     switch( direct ){
       case RIGHT:
         block->borders->left = move;
+        std::cout << "left: " << move << std::endl;
         break;
       case UP:
         block->borders->down = move;
+        std::cout << "down: " << move << std::endl;
         break;
       case LEFT:
         block->borders->right = move;
+        std::cout << "right: " << move << std::endl;
         break;
       case DOWN:
         block->borders->up = move;
+        std::cout << "up: " << move << std::endl;
         break;
       default:
         break;
@@ -347,14 +445,32 @@ public:
 
 // functions for statemachine
 
+  void mappingBlank(){
+    current_block->setMark(BLANK);
+    return;
+  }
+
   void updateCurrent(){
     current_block->setHasKobuki(false);
     current_block = next_block;
-    current_block->setMark(BLANK);
     current_block->setHasKobuki(true);
     return;
   }
 
+  /*==== not use queue ====//
+  bool setPathToNextBlock(){
+    Block* goal = getNextBlock();
+    if ( goal != NULL ){
+      std::vector<Block *> dummy;
+      dummy.push_back( goal );
+      pushPath( dummy );
+      return(true);
+    }
+    else return(false);
+  }
+  //=======================*/
+
+  //==== use queue ====//
   bool setPathToNextBlock(){
     std::vector<Block *> path = mapgraph.getPathToNearestUnknownBlock( this->current_block );
     if( path.empty() ) return( false );
@@ -383,35 +499,40 @@ public:
     manager.changeDirection( speed, turnAngle );
   }
 
-  void RunToNext( double speed ){
+  void runToNext( double speed ){
     double runDistance = getNextDistance( this->next_block );
     manager.goStraight( speed, runDistance );
   }
 
   void foundObstacle(){
-    next_block->setMark(OBSTACLE);
-    double movement = getMovement( current_block );
+    this->next_block->setMark(OBSTACLE);
+    double movement = getMovement( this->next_block );
     Direction direction = getDirection();
-    setObstacleSize( next_block, movement, direction );
+    Direction new_direction = updateDirection( direction );
+    if( direction != new_direction ) movement = 0.10;
+    setObstacleSize( this->next_block, movement, direction );
   }
 
   void goBackToCurrent( double speed ){
-    next_block = current_block;
-    double runDistance = getNextDistance( next_block );
+    this->next_block = this->current_block;
+    double runDistance = getNextDistance( this->next_block );
     manager.goStraight( -speed, runDistance );
   }
 
-/*
+  void goBack( double speed, double distance ){
+    manager.goStraight( -speed, distance );
+  }
+
   void recordIR( void ){
     manager.getIRData();
     for( unsigned int i = 0; i < 3; i++ ){
     
       kobuki::IRManager::Data ir_data = manager.getIRData();
 
-      if(  (ir_data[i].far_left     == 1)
+      if(/*  (ir_data[i].far_left     == 1)
         || (ir_data[i].far_center   == 1)
         || (ir_data[i].far_right    == 1)
-        || (ir_data[i].near_left    == 1)
+        ||*/ (ir_data[i].near_left    == 1)
         || (ir_data[i].near_center  == 1)
         || (ir_data[i].near_right   == 1) ){
         
@@ -431,6 +552,34 @@ public:
     }
     return( NULL );
   }
+
+  /*==== not use queue ====//
+  bool setNextIRBlock( void ){
+    Block *ir = map.searchIRBlock();
+    if( ir == MULL ) return(false);             // IRmark not found    
+    
+    std::vector<Block *> dummy;
+    dummy.push_back( ir );
+    map.pushPath( dummy );
+    return(true);
+  }
+  //=======================*/
+
+  //==== use queue ====//
+  bool setNextIRBlock( void ){
+    Block *ir = NULL;
+
+    while(1){
+      ir = searchIRBlock();
+      if( ir == NULL ) break;             // IRmark not found
+
+      if( setPathToTargetBlock(ir) ) break;   // set path
+      else ir->setIRMark( NOT_EXIST );    // cannot reach the block
+    }
+    
+    if( ir != NULL ) return(true);
+    else return(false);
+  }
   
   void clearIRMark( void ){
     std::queue<Block *> q;
@@ -440,29 +589,193 @@ public:
       q.pop();
 
       if( tmp->getIRMark() == EXIST ){
+        tmp->setIRMark( NOT_EXIST );
+
         int x = tmp->getTagX();
         int y = tmp->getTagY();
         int max_x = this->block_list.size()-1;
         int max_y = this->block_list[x].size()-1;
-        if(( x > 0 )&&( this->block_list[x-1][y].getIRMark() == EXIST ))
-          q.push( &this->block_list[x-1][y] );
-        if(( x < max_x )&&( this->block_list[x+1][y].getIRMark() == EXIST ))
-          q.push( &this->block_list[x+1][y] );
-        if(( y > 0 )&&( this->block_list[x][y-1].getIRMark() == EXIST ))
-          q.push( &this->block_list[x][y-1] );
-        if(( y < max_y )&&( this->block_list[x][y+1].getIRMark() == EXIST ))
-          q.push( &this->block_list[x][y+1] );
+        
+        for( int i = x-1; i <= x+1; i++ ){
+          if( (i < 0) || (i > max_x) ) continue;
 
-        tmp->setIRMark( NOT_EXIST );
+          for( int j = y-1; j <= y+1; j++ ){
+            if( (j < 0) || (j > max_y) ) continue;
+
+            if( this->block_list[i][j].getIRMark() == EXIST )
+              q.push( &this->block_list[i][j] );
+          }
+        }
       }
     }
     return;
   }
-*/
 
-private:
+  void docking( void ){
+    manager.docking();
+    return;
+  }
+
+  void Wait( double t ){
+    time_t start;
+    time_t now;
+
+    time(&start);
+    time(&now);
+    while( (now-start) < t ){
+      time(&now);
+    }
+    return;
+  }
+
+  void markDockBlock( Block* dock ){
+    std::queue<Block*> qu_dock;
+
+    dock->setMark( DOCK );
+    qu_dock.push( dock );
+
+    while( !qu_dock.empty() ){
+      Block* tmp = qu_dock.front();
+      qu_dock.pop();
+
+      int x = tmp->getTagX();
+      int y = tmp->getTagY();
+      int max_x = this->block_list.size()-1;
+      int max_y = this->block_list[x].size()-1;
+        
+      for( int i = x-1; i <= x+1; i++ ){
+        if( (i < 0) || (i > max_x) ) continue;
+
+        for( int j = y-1; j <= y+1; j++ ){
+          if( (j < 0) || (j > max_y) ) continue;
+
+          if( this->block_list[i][j].getMark() == OBSTACLE ){
+            tmp->setMark( DOCK );
+            qu_dock.push( &this->block_list[i][j] );
+          }
+        }
+      }
+    }
+    return;
+  }
+  
+  //
+  void searchObstacleBlocks(){
+    for( unsigned int i = 0; i < this->block_list.size(); i++ ){
+      for( unsigned int j = 0; j < this->block_list[i].size(); j++ ){
+        if( this->block_list[i][j].getMark() == OBSTACLE ){
+          qu_obstacle.push( &this->block_list[i][j] );
+        }
+      }
+    }
+    return;
+  }
+
+  bool setNextUncheckedObstacle(){
+    if( qu_obstacle.empty() ){
+      this->next_obstacle = NULL;
+      return(false);
+    }
+    else {
+      this->next_obstacle = qu_obstacle.front();
+      qu_obstacle.pop();
+      flg_border = 0;
+      return(true);
+    }
+  }
+
+  Block* getUnmeasuredSideBlock( Block* obstacle ){
+    Block* side_block = NULL;
+
+    while( this->flg_border < 4 ){
+      double tmp;
+      switch( this->flg_border ){
+        case 0: tmp = obstacle->borders->left; break;
+        case 1: tmp = obstacle->borders->up; break;
+        case 2: tmp = obstacle->borders->right; break;
+        case 3: tmp = obstacle->borders->down; break;
+        default: tmp = -1.0; break;
+      }
+      if( tmp == 0.0 ){
+        side_block = mapgraph.getSideBlock( obstacle, this->flg_border );
+        if( side_block != NULL ) break;
+      }  
+       this->flg_border++;
+    }
+
+    return( side_block );
+  }
+
+  bool setNextSide(){
+    Block* next_side = getUnmeasuredSideBlock( next_obstacle );
+    if( next_side == NULL ) {
+      return(false);
+    }
+    else{
+      if( setPathToTargetBlock(next_side) ) return(true);
+      else(false);
+    }
+  }
+
+  void turnToObstacle( double speed ){
+    double turnAngle = getTurnAngle( this->next_obstacle );
+    manager.changeDirection( speed, turnAngle );
+  }
+
+  void runToObstacle( double speed ){
+    double runDistance = getNextDistance( this->next_obstacle );
+    manager.goStraight( speed, runDistance );
+  }
+
+  void measureBorder(){
+    double movement = getMovement( this->next_obstacle );
+    Direction direction = getDirection();
+    setObstacleSize( this->next_obstacle, movement, direction );
+    this->flg_border++;
+  }
+
+  // get method for eventmanager
+
+  kobuki::SensorManager::Data getSensorData(){
+    return( manager.getSensorData() );
+  }
+
+  kobuki::IRManager::Data getIRData(){
+    return( manager.getIRData() );
+  }
+
+  KobukiManager::RunData getRunData(){
+    return( manager.getRunData() );
+  }
+
+  void showMe( void ){
+    for( unsigned int i = 0; i < this->block_list.size(); i++ ){
+      for( unsigned int j = 0; j < this->block_list[i].size(); j++ ){
+        if( this->block_list[i][j].getMark() == BLANK ) std::cout << " ";
+        else if( this->block_list[i][j].getMark() == UNKNOWN ) std::cout << "$";
+        else if( this->block_list[i][j].getMark() == OBSTACLE ) std::cout << "*";
+        else if( this->block_list[i][j].getMark() == WALL ) std::cout << "#";
+      }
+      std::cout << std::endl;
+    }
+    return;
+  }
+
+  void showIR( void ){
+    for( unsigned int i = 0; i < this->block_list.size(); i++ ){
+      for( unsigned int j = 0; j < this->block_list[i].size(); j++ ){
+        if( this->block_list[i][j].getIRMark() == NOT_EXIST ) std::cout << " ";
+        else if( this->block_list[i][j].getIRMark() == EXIST ) std::cout << "!";
+      }
+      std::cout << std::endl;
+    }
+    return;
+  }
+
+//private:
   Coordinate max;
   std::vector< std::vector<Block> > block_list;
+  std::vector< Block > wall_list;
   Block* current_block;
   Block* next_block;
   KobukiManager manager;
@@ -470,6 +783,9 @@ private:
   MapGraph mapgraph;
   double angle_to_next;
   double distance_to_next;
+  std::queue<Block *> qu_obstacle;
+  Block* next_obstacle;
+  int flg_border;
 
  };
 

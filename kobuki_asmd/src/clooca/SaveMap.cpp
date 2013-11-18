@@ -37,13 +37,13 @@
 	pPixelData = (GLubyte*)malloc(PixelDataLength); 
 	if( pPixelData == 0 ) 
 		exit(0); 
-	pDummyFile = fopen("/home/winter/dummy.bmp", "rb+");
+	pDummyFile = fopen("/home/dummy.bmp", "rb+");
   if( pDummyFile == 0 ) 
 	{  
            printf("Can't open dummy.bmp\n");
    	   exit(0); 
 	}
-	pWritingFile = fopen("/home/winter/Map.bmp", "wb+");
+	pWritingFile = fopen("/home/Map.bmp", "wb+");
   if( pWritingFile == 0 )
 	{  
            printf("Can't open Map.bmp\n");

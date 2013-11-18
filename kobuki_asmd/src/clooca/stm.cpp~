@@ -18,7 +18,7 @@ int KobukiStateMachine::execute(MEXUEvent *event) {
     return 0;
   }                                        
 
-  int next_state = matrix[current_state * 8 + event->event_id];
+  int next_state = matrix[current_state * 7 + event->event_id];
     
   if(next_state == -1) {
     return 0;
